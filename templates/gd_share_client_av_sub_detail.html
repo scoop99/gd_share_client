@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+  {{ macros.info_text('folder_name', '이름') }}
+  {{ macros.info_text('meta_title', '제목') }}
+  {{ macros.info_text('meta_summury', '내용') }}
+  {{ macros.info_text('video_count', '비디오 파일') }}
+  {{ macros.m_hr() }}
+  {{ macros.setting_button([['folder_download_btn', '폴더 다운로드']], left='Action' ) }}
+  {{ macros.m_hr() }}
+  {{ macros.setting_input_text_and_buttons('plex_metakey', 'PLEX 메타', [['plex_go_btn', 'PLEX GO'], ['plex_search_btn', 'PLEX 에서 찾기'], ['metadata_refresh_btn', '메타 새로고침']], disabled=True ) }}
+  {{ macros.info_text('plex_info', '') }}
+  
+</div> <!--전체-->
+
+
+<script type="text/javascript">
+var package_name = "{{arg['package_name']}}";
+var sub = "{{arg['sub']}}";
+var current_data = null;
+var folder_name = "{{arg['folder_name']}}";
+var plex_rule = "{{arg['av_sub_plex_match_rule']}}";
+var plex_url = "{{arg['plex_url']}}";
+var plex_machineIdentifier = "{{arg['plex_machineIdentifier']}}";
+
+$(document).ready(function(){
+  load(folder_name);
+});
+
+
+function load(folder_name) {
+  $.ajax({
+    url: '/' + package_name + '/ajax/' + sub + '/get_by_folder_name',
+    type: "POST", 
+    cache: false,
+    data: {folder_name:folder_name},
+    dataType: "json",
+    success: function (data) {
+      current_data = data;
+      //m_modal(data);
+      make_info(data)
+    }
+  });
+}
+
+function make_info(data) {
+  console.log(data)
+  document.getElementById("folder_name").innerHTML = data.folder_name + ' / ' + data.meta_date + ' / ' + data.meta_actor;
+  document.getElementById("meta_title").innerHTML = data.meta_title;
+  document.getElementById("meta_summury").innerHTML = '<small>' + data.meta_summury + '</small>';
+  document.getElementById("video_count").innerHTML = data.video_count + ' 개';
+  
+  str = ''
+  for (i in data.files) {
+    str += data.files[i].filename;
+    str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + humanFileSize(data.files[i].filesize);
+    tmp = parseInt(data.files[i].duration/60);
+    tmp = parseInt(tmp / 60) + '시간 ' + (tmp%60) + '분'
+    str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + tmp;
+    str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + data.files[i].width + 'x' + data.files[i].height;
+    str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + parseInt(data.files[i].bitrate/1000) + 'kbps';
+    str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + data.files[i].codec_name;
+    document.getElementById("video_count").innerHTML = document.getElementById("video_count").innerHTML + '<br>' + str;
+  }
+  if (data.plex_metakey !=null) {
+    document.getElementById("plex_metakey").value = data.plex_metakey;
+    $("#plex_go_btn").prop("disabled", false);
+  } else {
+    $("#plex_go_btn").prop("disabled", true);
+  }
+
+  if (data.plex_json != null) {
+    str = ''
+    flag_need_copy = false
+    srt_count = 0
+    for (i in data.plex_json.list) {
+      if ( data.plex_json.list[i].sub != null) {
+        srt_count++;
+      }
+    }
+    if (srt_count > 0 && srt_count != data.plex_json.list[i].length ) {
+      flag_need_copy = true
+    }
+    for (i in data.plex_json.list) {
+      str += '<li>' + data.plex_json.list[i].filepath + '<br>'
+      str += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + humanFileSize(data.plex_json.list[i].size);
+      tmp = parseInt(data.plex_json.list[i].duration/1000/60);
+      tmp = parseInt(tmp / 60) + '시간 ' + (tmp%60) + '분'
+      str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + tmp;
+      str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + data.plex_json.list[i].width + 'x' + data.plex_json.list[i].height;
+      str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + parseInt(data.plex_json.list[i].bitrate/1000) + 'kbps';
+      str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + data.plex_json.list[i].video_codec;
+      str += '&nbsp;&nbsp;/&nbsp;&nbsp;' + data.plex_json.list[i].audio_codec;
+      str += '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;자막 : ';
+      btn_str = m_button('video_upload_btn', '이 영상 업로드', [{'key':'index', 'value':i}]);
+      if ( data.plex_json.list[i].sub != null) {
+        str += data.plex_json.list[i].sub +'<br>';
+        //if (flag_need_copy)
+          //btn_str += m_button('srt_copy_btn', '이 자막을 다른 영상의 자막으로 복사', [{'key':'index', 'value':i}, {'key':'folder_name', 'value':current_data.folder_name}]);
+      }
+      else {
+        str += '없음.<br>';
+        btn_str += m_button('srt_download_by_filename_btn', '이 영상의 자막으로 다운로드', [{'key':'index', 'value':i}]);
+      }
+      btn_str = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + m_button_group(btn_str)
+      str += btn_str;
+      str += '<br>'
+      str += '</li>'
+    }
+    document.getElementById("plex_info").innerHTML = str;
+  }
+}
+
+
+$("body").on('click', '#plex_search_btn', function(e){
+  e.preventDefault();
+  keyword = current_data.folder_name;
+  $.ajax({
+    url: '/' + package_name + '/ajax/' + sub + '/plex_search',
+    type: "POST", 
+    cache: false,
+    data: {keyword:keyword},
+    dataType: "json",
+    success: function (data) {
+      $.notify('<strong>업데이트하였습니다.</strong>', {type: 'success'});
+      load(folder_name);
+   }
+  });
+});
+
+/*
+$("body").on('click', '#srt_copy_btn', function(e){
+  e.preventDefault();
+  srt_index = $(this).data('index');
+  folder_name = $(this).data('folder_name');
+  $.ajax({
+    url: '/' + package_name + '/ajax/' + sub + '/srt_copy',
+    type: "POST", 
+    cache: false,
+    data: {folder_name:folder_name, srt_index:srt_index},
+    dataType: "json",
+    success: function (data) {
+      if (data.ret == false) {
+        $.notify('<strong>복사 실패</strong>', {type: 'warning'});
+      }
+    }
+  });
+});
+*/
+
+$("body").on('click', '#metadata_refresh_btn', function(e){
+  e.preventDefault();
+  metakey = current_data.plex_metakey;
+  $.ajax({
+    url: '/' + package_name + '/ajax/' + sub + '/plex_refresh',
+    type: "POST", 
+    cache: false,
+    data: {metakey:metakey, folder_name:current_data.folder_name},
+    dataType: "json",
+    success: function (data) {
+      if (data) {
+        $.notify('<strong>명령을 전송하였습니다.<br>잠시 후 PLEX에서 찾기를 다시 수행하세요.</strong>', {type: 'success'});
+        //load(folder_name);
+      }
+   }
+  });
+});
+
+$("body").on('click', '#plex_go_btn', function(e){
+  e.preventDefault();
+  metakey = current_data.plex_metakey;
+  url = plex_url + '/web/index.html#!/server/' + plex_machineIdentifier + '/details?key=' + metakey;
+  url = 'https://app.plex.tv/desktop#!/server/' + plex_machineIdentifier + '/details?key=' + metakey;
+
+  window.open(url, "_blank");
+
+  //https://app.plex.tv/desktop#!/server/e405a58c97cb86ea1a7b85bbd3fdc31026a6ded9/details?key=%2Flibrary%2Fmetadata%2F49075&context=library%3Acontent.library
+});
+
+
+
+
+$("body").on('click', '#srt_download_btn', function(e){
+  e.preventDefault();
+  redirect = '/' + package_name + '/base/transfer';
+  remote_path = (current_data.remote_path == null) ? '' : current_data.remote_path;
+  $.redirectPost(redirect, {mode:'download', server_type:'content', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':current_data['folder_name'], 'server_filename':current_data['folder_name']+'.ko.srt', 'remote_path':remote_path});
+});
+
+$("body").on('click', '#srt_download_by_filename_btn', function(e){
+  e.preventDefault();
+  index = parseInt($(this).data('index'));
+  tmp = current_data.plex_json.list[index].filename;
+  idx = tmp.lastIndexOf('.');
+  tmp = tmp.substring(0, idx) + '.ko.srt';
+  remote_path = current_data.remote_path + '/' + tmp
+  redirect = '/' + package_name + '/base/transfer';
+  $.redirectPost(redirect, {mode:'download', server_type:'content', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':current_data['folder_name'], 'server_filename':current_data['folder_name']+'.ko.srt', 'remote_path':remote_path});
+});
+
+
+
+
+
+$("body").on('click', '#folder_download_btn', function(e){
+  e.preventDefault();
+  redirect = '/' + package_name + '/base/transfer';
+  $.redirectPost(redirect, {mode:'download', server_type:'content', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':current_data['folder_name'], 'server_filename':''});
+});
+
+$("body").on('click', '#video_upload_btn', function(e){
+  e.preventDefault();
+  index = parseInt($(this).data('index'));
+  remote_path = current_data.plex_json.list[index].remote_path;
+  redirect = '/' + package_name + '/base/transfer';
+  $.redirectPost(redirect, {mode:'upload', server_type:'content', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':current_data['folder_name'], 'server_filename':'', 'remote_path':remote_path});
+});
+
+// 폴더채 업로드
+$("body").on('click', '#folder_upload_btn', function(e){
+  e.preventDefault();
+  redirect = '/' + package_name + '/base/transfer';
+  $.redirectPost(redirect, {mode:'upload', server_type:'category', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':'', 'server_filename':''});
+});
+
+
+//redirect = '/system/log'
+//        $.redirectPost(redirect, {filename: data['filename']});
+
+</script>    
+{% endblock %}

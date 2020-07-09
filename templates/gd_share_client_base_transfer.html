@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+  <form id='transfer_setting' name='transfer_setting'>
+    {{ macros.setting_radio('mode', '모드', ['다운로드', '업로드'], disabled=True) }}
+    {{ macros.m_hr() }}
+
+    {{ macros.setting_radio('server_folder_type', '서버 폴더 Type', ['카테고리', '컨텐츠'], disabled=True) }}
+    
+    {{ macros.setting_input_hidden('folder_id', arg['folder_id']) }}
+    {{ macros.setting_input_hidden('folder_name', arg['folder_name']) }}
+    {{ macros.setting_input_text('server_filename', '서버 파일명', value=arg['server_filename'], disabled=True) }}
+    
+    {{ macros.m_hr() }}
+    {{ macros.setting_input_text_and_buttons('my_remote_path', 'My 리모트 경로', [['rclone_lsjson_btn', '내용 보기']], value=arg['defalut_remote_path'], desc=['다운로드 : 컨텐츠를 다운받을 폴더', '업로드 - 카테고리 : 업로드할 컨텐츠 폴더', '업로드 - 컨텐츠 : 업로드할 파일']) }}
+    {{ macros.m_hr() }}
+    {{ macros.setting_button([['do_transfer_btn', '실행'], ['do_dry_btn', 'DRY']], left='서버' ) }}
+  </form>
+</div> <!--전체-->
+
+
+<script type="text/javascript">
+var package_name = "{{arg['package_name'] }}";
+var sub = "{{arg['sub'] }}";
+var mode = "{{arg['mode'] }}";
+var server_type = "{{arg['server_type'] }}";
+
+$(document).ready(function(){
+  if (mode =='download') {
+    $('input[name=mode]')[0].checked = true;
+  } else if (mode == 'upload') {
+    $('input[name=mode]')[1].checked = true;
+  }
+
+  if (server_type == 'category') {
+    $('input[name=server_folder_type]')[0].checked = true;
+  } else if (server_type == 'content') {
+    $('input[name=server_folder_type]')[1].checked = true;
+  }
+});
+
+
+$("body").on('click', '#rclone_lsjson_btn', function(e) {
+  e.preventDefault();
+  remote_path = document.getElementById('my_remote_path').value;
+  $.ajax({
+    url: '/' + package_name + '/ajax/'+sub+'/rclone_lsjson',
+    type: "POST", 
+    cache: false,
+    data: {remote_path:remote_path},
+    dataType: "json",
+    success: function (data) {
+      m_modal(data, remote_path);
+    }
+  });
+});
+
+$("body").on('click', '#do_dry_btn', function(e) {
+  e.preventDefault();
+  do_action('dry');
+});
+$("body").on('click', '#do_transfer_btn', function(e) {
+  e.preventDefault();
+  do_action('real');
+});
+
+function do_action(action) {
+  var formData = get_formdata('#transfer_setting')
+  formData += '&action=' + action;
+
+  //console.log(formData)
+  $.ajax({
+    url: '/' + package_name + '/ajax/'+sub+'/do_action',
+    type: "POST", 
+    cache: false,
+    data: formData,
+    dataType: "json",
+    success: function (data) {
+      //m_modal(data);
+    }
+  });
+}
+</script>    
+{% endblock %}

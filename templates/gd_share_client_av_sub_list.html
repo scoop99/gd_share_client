@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+  {{ macros.m_button_group([['folder_upload_btn', '신규 업로드'], ['all_plex_search_btn', '전체 PLEX에서 찾기']])}}
+  {{ macros.m_row_start('1') }}
+  {{ macros.m_row_end() }}
+  {{ macros.m_hr_head_bottom() }}
+
+  <form id="form_search" class="form-inline" style="text-align:left">
+    <div class="container-fluid">
+      <div class="row show-grid">
+        <span class="col-md-3">
+          <select id="option" name="option" class="form-control form-control-sm">
+            <option value="all">전체</option>
+            <option value="only_srt">서버-자막만</option>
+            <option value="include_video">서버-영상포함</option>
+            <option value="2">로컬에 영상만 있는 경우</option>
+            <option value="3">서버-영상포함, 로컬 없는 경우</option>
+            <option value="33">강제이동완료</option>
+            <option value="99">검색실패</option>
+            <option value="100">만료</option>
+          </select>
+        </span>
+        <span class="col-md-3">
+          <select id="order" name="order" class="form-control form-control-sm">
+            <option value="name">이름순</option>
+            <option value="name_desc">이름역순</option>
+            <option value="date">발매순</option>
+            <option value="date_desc" selected>발매역순</option>
+          </select>
+        </span>
+        <span class="col-md-6">
+          <input id="search_word" name="search_word" class="form-control form-control-sm w-75" type="text" placeholder="품번" aria-label="Search">
+          <button id="search" class="btn btn-sm btn-outline-success">검색</button>
+          <button id="reset_btn" class="btn btn-sm btn-outline-success">리셋</button>
+	      </span>
+      </div>
+    </div>
+  </form>
+  <div id='page1'></div>
+  {{ macros.m_row_start('5') }}
+  <div id="list_div"></div>
+  <div id='page2'></div>
+</div>
+<link href="https://getbootstrap.com/docs/4.0/examples/album/album.css" rel="stylesheet">
+
+<script type="text/javascript">
+var package_name = "{{arg['package_name']}}";
+var sub = "{{arg['sub']}}";
+var current_data = null;
+var av_sub_show_poster = ("{{arg['av_sub_show_poster']}}" == 'True')
+
+
+$(document).ready(function(){
+  request_search('1');
+});
+
+$("#search").click(function(e) {
+  e.preventDefault();
+  request_search('1');
+});
+
+$("body").on('click', '#page', function(e){
+  e.preventDefault();
+  request_search($(this).data('page'));
+});
+
+$("#reset_btn").click(function(e) {
+  e.preventDefault();
+  document.getElementById("order").value = 'name';
+  document.getElementById("option").value = 'all';
+  document.getElementById("search_word").value = '';
+  request_search('1')
+});
+
+function request_search(page) {
+  var formData = get_formdata('#form_search')
+  formData += '&page=' + page;
+  $.ajax({
+    url: '/' + package_name + '/ajax/' + sub + '/web_list',
+    type: "POST", 
+    cache: false,
+    data: formData,
+    dataType: "json",
+    success: function (data) {
+      current_data = data;
+      window.scrollTo(0,0);
+      make_list(data.list)
+      make_page_html(data.paging)
+    }
+  });
+}  
+
+
+$("body").on('click', '#more_btn', function(e){
+  e.preventDefault();
+  item_id = $(this).data('idx')
+  //url = package_name + '/' + sub + '/info?folder_name=' + current_data.list[item_id].folder_name;
+  //$(location).attr('href', url)
+  redirect = 'detail'
+  $.redirectPost(redirect, {folder_name: current_data.list[item_id].folder_name});
+});
+
+$("body").on('click', '#json_btn', function(e){
+  e.preventDefault();
+  item_id = $(this).data('idx')
+  m_modal(current_data.list[item_id])
+});
+
+
+// 폴더채 업로드
+$("body").on('click', '#folder_upload_btn', function(e){
+  e.preventDefault();
+  redirect = '/' + package_name + '/base/transfer';
+  $.redirectPost(redirect, {mode:'upload', server_type:'category', 'folder_id':'pzfL3ROb2P7bbAASfC1PGstTJUZscnJIMwjQO2Y538W6PyN+7ehUiq9bx9SN+h/FTxYS31KNbGqxDbGtv16jxQ==', 'folder_name':'', 'server_filename':''});
+});
+
+
+
+
+function make_list(data){
+  //data = ret.data.body.result;
+  // str = '총 ' + data.length + '편';
+  str = ''
+  str += '<hr>';
+  str += '<div class="row">';
+  for (i in data) {
+    console.log(data[i])
+    str += '<div class="col-md-2 col-sm-4 col-6">';
+    str += '<div class="card mb-2 sm-4 box-shadow">';
+    if (av_sub_show_poster && data[i].meta_poster != null)
+      str += '<img class="card-img-top" src="' + data[i].meta_poster + '" class="img-fluid img-thumbnail">';
+    if (data[i].video_count > 0)
+      str += '<div class="card-body text-white bg-dark">';
+    else
+      str += '<div class="card-body">';
+    str += '<p class="card-text">';
+    str += '<strong>' + data[i].folder_name + '</strong>';
+    str += '<small class="text-muted">';
+    if (data[i].meta_date != null)
+      str += ' (' + data[i].meta_date + ')';
+    if (data[i].video_count > 0)
+      str += '<br>비디오 : ' + data[i].video_count;
+    else
+      str += '<br>비디오 없음';
+    str += '</small>'
+    //str += m_hr();
+    //str += '<hr>';
+    
+    str += '<div class="d-flex justify-content-between align-items-center">';
+    str += '<div class="btn-group">';
+    str += '<button id="more_btn" name="submit" type="button" class="btn btn-sm btn-outline-secondary" data-idx="'+i+'">MORE</button>';
+    str += '<button id="json_btn" name="submit" type="button" class="btn btn-sm btn-outline-secondary" data-idx="'+i+'">JSON</button>';
+    str += '</div>';
+    str += '</div>';
+    
+    /*
+    tmp = m_button('more_btn', 'More', [{'key':'id', 'value':data[i].id}]);
+    tmp += m_button('json_btn', 'JSON', [{'key':'id', 'value':data[i].id}]);
+    tmp = m_button_group(tmp)
+    str += tmp
+    */
+    //str += '<hr style="width: 100%; margin-left:0px; margin-right:0px; margin-top:0px; margin-bottom:1px">'
+    str += '<hr>';
+    //str += m_hr('10');
+    str += '<small class="text-muted">';
+    if (data[i].meta_actor)
+      str += data[i].meta_actor + '<br>';
+    if (data[i].meta_title == null || data[i].meta_title == '')
+      str += '메타 없음.'
+    else
+      str += data[i].meta_title;
+    str += '</small>';
+    str += '</p>';
+    
+    str += '</div>';
+    str += '</div>';
+    str += '</div>';
+  }
+  str += '</div>';
+
+  document.getElementById("list_div").innerHTML = str;
+}
+
+
+</script>
+
+{% endblock %}

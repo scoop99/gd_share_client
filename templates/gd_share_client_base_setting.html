@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+  {{ macros.m_button_group([['global_setting_save_btn', '설정 저장']])}}
+  {{ macros.m_row_start('5') }}
+  {{ macros.m_row_end() }}
+  <nav>
+    {{ macros.m_tab_head_start() }}
+      {{ macros.m_tab_head2('normal', '공유 폴더', true) }}
+    {{ macros.m_tab_head_end() }}
+  </nav>
+  <form id='setting' name='setting'>
+  <div class="tab-content" id="nav-tabContent">
+    <!-- 일반 -->
+    {{ macros.m_tab_content_start('normal', true) }}
+      {{ macros.setting_input_textarea('rclone_info', 'Rclone 리모트 정보', desc=['사용할 구글 드라이브 리모트 정보를 rclone.conf 파일에서 찾아 입력합니다.', 'My Drive 리모트이고 root_folder_id 값은 없어야 합니다.'], value=arg['rclone_info'], row='12') }}
+      {{ macros.setting_input_text_and_buttons('defalut_remote_path', '기본 리모트 경로', [['rclone_lsjson_btn', '폴더내용 보기']], value=arg['defalut_remote_path'], desc=['전송 화면에 기본적으로 들어갈 값.', 'sjva.me에서 다운로드 버튼 클릭시 컨텐츠가 다운로드 폴더']) }}
+      <!--
+      {{ macros.setting_input_text_and_buttons('remote_info', '리모트 경로', [['rclone_lsjson_btn', '폴더내용 보기']], value='', desc=['지정한 공유폴더의 리모트 경로를 입력합니다.', '이 폴더는 share@sjva.me 계정과 공유되어 있어야 하며 폴더 이름은 ' + '' + '여야합니다.', '하위 폴더로 donwload, upload 폴더가 있어야 합니다.']) }}
+      {{ macros.setting_input_text_and_buttons('share_folder_id', '구글 폴더 ID', [['get_folderid_btn', '가져오기']], value='', disabled=True) }}
+      
+      {{ macros.m_hr() }}
+      {{ macros.info_text_and_buttons('share_available', '공유 가능', [['share_available_confirm_btn', '공유 가능 확인']], value='') }}
+      -->
+      {{ macros.m_hr() }}
+      {{ macros.setting_input_text('rclone_path', 'Rclone path',value=arg['rclone_path']) }}
+      {{ macros.setting_input_text('rclone_config_path', 'Rclone config path',value=arg['rclone_config_path']) }}
+
+      {{ macros.m_hr() }}
+      {{ macros.info_text('count_upload', 'Upload count', value=arg['count_upload'], desc=['자료 제공 횟수'] ) }}
+      {{ macros.info_text('count_download', 'Download count', value=arg['count_download'], desc=['자료 공유 횟수'] ) }}
+    {{ macros.m_tab_content_end() }}
+  </div><!--tab-content-->
+  </form>
+</div> <!--전체-->
+
+
+<script type="text/javascript">
+var package_name = "{{arg['package_name'] }}";
+var sub = "{{arg['sub'] }}";
+
+$(document).ready(function(){
+});
+
+
+$("body").on('click', '#rclone_lsjson_btn', function(e) {
+  e.preventDefault();
+  remote_path = document.getElementById('defalut_remote_path').value;
+  $.ajax({
+    url: '/' + package_name + '/ajax/'+sub+'/rclone_lsjson',
+    type: "POST", 
+    cache: false,
+    data: {remote_path:remote_path},
+    dataType: "json",
+    success: function (data) {
+      m_modal(data, remote_path);
+    }
+  });
+});
+
+$("body").on('click', '#get_folderid_btn', function(e) {
+  e.preventDefault();
+  remote_path = document.getElementById('remote_info').value;
+  $.ajax({
+    url: '/' + package_name + '/ajax/'+sub+'/get_folderid',
+    type: "POST", 
+    cache: false,
+    data: {remote_path:remote_path},
+    dataType: "json",
+    success: function (data) {
+      if (data.ret) {
+        document.getElementById('share_folder_id').value = data.data;
+        $.notify('<strong>폴더ID를 가져왔습니다. <br>'+data.data+'</strong><br>', {type: 'success'});
+      }else {
+        $.notify('<strong>실패하였습니다.<br>'+data.data+'</strong><br>', {type: 'warning'});
+      }
+    }
+  });
+});
+
+</script>    
+{% endblock %}
