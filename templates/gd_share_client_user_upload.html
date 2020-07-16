@@ -6,8 +6,7 @@
 
     {{ macros.setting_select_empty('board_type', '게시판', col='6') }}
     {{ macros.setting_select_empty('category_type', '카테고리', col='6') }}
-    {{ macros.setting_input_text_and_buttons('my_remote_path', 'My 리모트 경로', [['rclone_lsjson_btn', '내용 보기'], ['rclone_size_btn', '크기 확인']], value='soju6janm:/test/박수건달 (2013)', desc=['업로드 - 카테고리 : 업로드할 컨텐츠 폴더']) }}
-    <!--value=arg['my_remote_path'], -->
+    {{ macros.setting_input_text_and_buttons('my_remote_path', 'My 리모트 경로', [['rclone_lsjson_btn', '내용 보기'], ['rclone_size_btn', '크기 확인']], value=arg['my_remote_path'], desc=['업로드 - 카테고리 : 업로드할 컨텐츠 폴더']) }}
     {{ macros.info_text('size_info', '업로드 폴더 정보') }}
 
     {{ macros.m_hr() }}
