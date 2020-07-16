@@ -28,8 +28,8 @@
       {{ macros.setting_input_text('rclone_config_path', 'Rclone config path',value=arg['rclone_config_path']) }}
 
       {{ macros.m_hr() }}
-      {{ macros.info_text('count_upload', 'Upload count', value=arg['count_upload'], desc=['자료 제공 횟수'] ) }}
-      {{ macros.info_text('count_download', 'Download count', value=arg['count_download'], desc=['자료 공유 횟수'] ) }}
+      {{ macros.info_text('count_upload', 'Upload Size', value=arg['size_upload'], desc=None ) }}
+      {{ macros.info_text('count_download', 'Download Size', value=arg['size_download'], desc=None ) }}
     {{ macros.m_tab_content_end() }}
   </div><!--tab-content-->
   </form>
