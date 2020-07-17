@@ -79,13 +79,16 @@ $("body").on('change', '#board_type', function(e){
     }
   }
   document.getElementById("category_type_div").innerHTML = str;
+  $('#category_type').change()
 });
 
 $("body").on('change', '#category_type', function(e){
   e.preventDefault();
   board_type = document.getElementById("board_type").value;
   category_type = document.getElementById("category_type").value;
-  
+  //console.log(board_type)
+  //console.log(category_type)
+
   for(var i in current_data) {
     if ( current_data[i].type == board_type) {
       for( j in current_data[i].list) {
@@ -96,7 +99,7 @@ $("body").on('change', '#category_type', function(e){
       }
     }
   }
-  //document.getElementById("category_type_div").innerHTML = str;
+  //console.log(document.getElementById("folder_id").value);
 });
 
 
