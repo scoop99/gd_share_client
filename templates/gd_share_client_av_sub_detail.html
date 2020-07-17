@@ -183,7 +183,7 @@ $("body").on('click', '#plex_go_btn', function(e){
 
 $("body").on('click', '#srt_download_btn', function(e){
   e.preventDefault();
-  redirect = '/' + package_name + '/base/transfer';
+  redirect = '/' + package_name + '/' + sub + '/transfer';
   remote_path = (current_data.remote_path == null) ? '' : current_data.remote_path;
   $.redirectPost(redirect, {mode:'download', server_type:'content', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':current_data['folder_name'], 'server_filename':current_data['folder_name']+'.ko.srt', 'remote_path':remote_path});
 });
@@ -195,7 +195,7 @@ $("body").on('click', '#srt_download_by_filename_btn', function(e){
   idx = tmp.lastIndexOf('.');
   tmp = tmp.substring(0, idx) + '.ko.srt';
   remote_path = current_data.remote_path + '/' + tmp
-  redirect = '/' + package_name + '/base/transfer';
+  redirect = '/' + package_name + '/' + sub + '/transfer';
   $.redirectPost(redirect, {mode:'download', server_type:'content', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':current_data['folder_name'], 'server_filename':current_data['folder_name']+'.ko.srt', 'remote_path':remote_path});
 });
 
@@ -205,7 +205,7 @@ $("body").on('click', '#srt_download_by_filename_btn', function(e){
 
 $("body").on('click', '#folder_download_btn', function(e){
   e.preventDefault();
-  redirect = '/' + package_name + '/base/transfer';
+  redirect = '/' + package_name + '/' + sub + '/transfer';
   $.redirectPost(redirect, {mode:'download', server_type:'content', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':current_data['folder_name'], 'server_filename':''});
 });
 
@@ -213,14 +213,14 @@ $("body").on('click', '#video_upload_btn', function(e){
   e.preventDefault();
   index = parseInt($(this).data('index'));
   remote_path = current_data.plex_json.list[index].remote_path;
-  redirect = '/' + package_name + '/base/transfer';
+  redirect = '/' + package_name + '/' + sub + '/transfer';
   $.redirectPost(redirect, {mode:'upload', server_type:'content', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':current_data['folder_name'], 'server_filename':'', 'remote_path':remote_path});
 });
 
 // 폴더채 업로드
 $("body").on('click', '#folder_upload_btn', function(e){
   e.preventDefault();
-  redirect = '/' + package_name + '/base/transfer';
+  redirect = '/' + package_name + '/' + sub + '/transfer';
   $.redirectPost(redirect, {mode:'upload', server_type:'category', 'folder_id':current_data['folder_id_encrypted'], 'folder_name':'', 'server_filename':''});
 });
 

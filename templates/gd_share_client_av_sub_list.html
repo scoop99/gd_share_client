@@ -114,8 +114,8 @@ $("body").on('click', '#json_btn', function(e){
 // 폴더채 업로드
 $("body").on('click', '#folder_upload_btn', function(e){
   e.preventDefault();
-  redirect = '/' + package_name + '/base/transfer';
-  $.redirectPost(redirect, {mode:'upload', server_type:'category', 'folder_id':'pzfL3ROb2P7bbAASfC1PGstTJUZscnJIMwjQO2Y538W6PyN+7ehUiq9bx9SN+h/FTxYS31KNbGqxDbGtv16jxQ==', 'folder_name':'', 'server_filename':''});
+  redirect = '/' + package_name + '/' + sub + '/transfer';
+  $.redirectPost(redirect, {mode:'upload', server_type:'category', 'folder_id':'A3U9TczB1ZHNggcuUqJH3V6J4kPd9IYTHSMD+1K7WSQ/Q273vlD852wdUZ1lCImG63UZZHjsst17ytQSu4MARQ==', 'folder_name':'', 'server_filename':''});
 });
 
 

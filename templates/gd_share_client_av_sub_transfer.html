@@ -15,7 +15,7 @@
     {{ macros.m_hr() }}
     {{ macros.setting_input_text_and_buttons('my_remote_path', 'My 리모트 경로', [['rclone_lsjson_btn', '내용 보기']], value=arg['defalut_remote_path'], desc=['다운로드 : 컨텐츠를 다운받을 폴더', '업로드 - 카테고리 : 업로드할 컨텐츠 폴더', '업로드 - 컨텐츠 : 업로드할 파일']) }}
     {{ macros.m_hr() }}
-    {{ macros.setting_button([['do_transfer_btn', '실행'], ['do_dry_btn', 'DRY']], left='서버' ) }}
+    {{ macros.setting_button([['do_transfer_btn', '실행']], left='서버' ) }}
   </form>
 </div> <!--전체-->
 
@@ -25,7 +25,7 @@ var package_name = "{{arg['package_name'] }}";
 var sub = "{{arg['sub'] }}";
 var mode = "{{arg['mode'] }}";
 var server_type = "{{arg['server_type'] }}";
-
+var start_folder_id = "{{arg['folder_id']}}";
 $(document).ready(function(){
   if (mode =='download') {
     $('input[name=mode]')[0].checked = true;
@@ -38,6 +38,10 @@ $(document).ready(function(){
   } else if (server_type == 'content') {
     $('input[name=server_type]')[1].checked = true;
   }
+  if (start_folder_id == '') {
+    $('#do_transfer_btn').attr('disabled', true);
+    $.notify('<strong>다른 화면에서 업로드, 다운로드 버튼으로 접근해야합니다.</strong><br>', {type: 'warning'});
+  }
 });
 
 
@@ -45,7 +49,7 @@ $("body").on('click', '#rclone_lsjson_btn', function(e) {
   e.preventDefault();
   remote_path = document.getElementById('my_remote_path').value;
   $.ajax({
-    url: '/' + package_name + '/ajax/'+sub+'/rclone_lsjson',
+    url: '/' + package_name + '/ajax/'+'base'+'/rclone_lsjson',
     type: "POST", 
     cache: false,
     data: {remote_path:remote_path},
@@ -56,10 +60,6 @@ $("body").on('click', '#rclone_lsjson_btn', function(e) {
   });
 });
 
-$("body").on('click', '#do_dry_btn', function(e) {
-  e.preventDefault();
-  do_action('dry');
-});
 $("body").on('click', '#do_transfer_btn', function(e) {
   e.preventDefault();
   do_action('real');
