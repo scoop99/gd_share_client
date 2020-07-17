@@ -15,7 +15,7 @@
     <!-- 일반 -->
     
     {{ macros.m_tab_content_start('normal', true) }}
-      {{ macros.setting_input_textarea('user_copy_dest_list', 'Copy Dest 리모트 정보', desc=['copy 리모트 정보', '형식 : 게시판이름,카테고리|리모트경로', '예) share_movie,국내:my_remote:/video/movie/download', '게시판이름,카테고리가 정보가 있는 경우 설정된 곳으로 복사합니다. 게시판이름| 이 있는 경우 카테고리에 상관없이 설정된 값에 복사합니다.', '정보가 없는 경우 default 에 복사합니다. default 값은 필수입니다.'], value=arg['user_copy_dest_list'], row='12') }}
+      {{ macros.setting_input_textarea('user_copy_dest_list', 'Copy Dest 리모트 정보', desc=['copy 리모트 정보', '형식 : 게시판이름,카테고리 = 리모트경로', '예) share_movie,국내 = my_remote:/video/movie/download', '게시판이름,카테고리가 정보가 있는 경우 설정된 곳으로 복사합니다.', '게시판이름만 있는 경우 카테고리에 상관없이 설정된 값에 복사합니다.', '정보가 없는 경우 default 에 복사합니다. default 값은 필수입니다.'], value=arg['user_copy_dest_list'], row='12') }}
 
     {{ macros.m_tab_content_end() }}
   </div><!--tab-content-->
