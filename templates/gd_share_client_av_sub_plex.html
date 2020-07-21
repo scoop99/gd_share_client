@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+  {{ macros.m_button_group([['plex_search_all_btn', '메타정보 없는 영상 PLEX에서 찾기']])}}
+  {{ macros.m_row_start('5') }}
+  {{ macros.m_row_end() }}
+  <textarea id="textarea_content" class="col-md-12" rows="30" disabled style="visibility:visible"></textarea>
+</div> <!--전체-->
+
+<script type="text/javascript">
+var package_name = "{{arg['package_name'] }}";
+var sub = "{{arg['sub'] }}";
+var current_data = null;
+
+
+
+$(document).ready(function(){
+  ResizeTextArea();
+  var protocol = window.location.protocol;
+  socket = io.connect(protocol + "//" + document.domain + ":" + location.port + "/" + package_name + '/' + sub);
+
+  console.log(socket);
+
+  socket.on('start', function(data){
+    console.log(data);
+    document.getElementById("textarea_content").innerHTML = data.data;
+  });
+
+  socket.on('add', function(data){
+    console.log(data);
+    document.getElementById("textarea_content").innerHTML += data.data;
+    document.getElementById("textarea_content").scrollTop = document.getElementById("textarea_content").scrollHeight;
+  });
+});
+
+
+function ResizeTextArea() {
+  ClientHeight = window.innerHeight
+  $("#textarea_content").height(ClientHeight-250);
+}
+$(window).resize(function() {
+  ResizeTextArea();
+});
+
+$("body").on('click', '#plex_search_all_btn', function(e){
+  e.preventDefault();
+  $.ajax({
+    url: '/' + package_name + '/ajax/'+sub+'/plex_search_all',
+    type: "POST", 
+    cache: false,
+    data: {},
+    dataType: "json",
+    success: function (data) {
+    }
+  });
+});
+
+
+</script>    
+{% endblock %}

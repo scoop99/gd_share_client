@@ -14,9 +14,11 @@
   <div class="tab-content" id="nav-tabContent">
     <!-- 일반 -->
     {{ macros.m_tab_content_start('normal', true) }}
-      {{ macros.setting_button([['get_server_list_btn', '서버 목록 업데이트']], left='서버' ) }}
       {{ macros.setting_checkbox('av_sub_show_poster', '포스터 표시', value=arg['av_sub_show_poster'], desc='On : 목록에 포스터 표시') }}
       {{ macros.setting_input_text_and_buttons('av_sub_plex_match_rule', 'PLEX 변환규칙', value=arg['av_sub_plex_match_rule'], desc=['Plex 사용시 입력. 형식: remote 경로|Plex 상의 경로', '예: gdrive:/|N: (구글드라이브 루트가 Plex 서버에서 N:으로 매칭)', '예: my_remote:/av|/volume1/gdrive/av (구글드라이브 av 폴더가 시놀 /voluem1/gdrive/av 폴더로 매칭)']) }}
+      {{ macros.m_hr() }}
+      {{ macros.setting_button([['get_server_list_btn', '서버 목록 업데이트']], left='서버' ) }}
+      {{ macros.setting_button([['folder_upload_btn', '신규 폴더 업로드']], left='서버' ) }}
     {{ macros.m_tab_content_end() }}
   </div><!--tab-content-->
   </form>
@@ -47,6 +49,14 @@ $("body").on('click', '#get_server_list_btn', function(e) {
     }
   });
 });
+
+// 폴더채 업로드
+$("body").on('click', '#folder_upload_btn', function(e){
+  e.preventDefault();
+  redirect = '/' + package_name + '/' + sub + '/transfer';
+  $.redirectPost(redirect, {mode:'upload', server_type:'category', 'folder_id':'A3U9TczB1ZHNggcuUqJH3V6J4kPd9IYTHSMD+1K7WSQ/Q273vlD852wdUZ1lCImG63UZZHjsst17ytQSu4MARQ==', 'folder_name':'', 'server_filename':''});
+});
+
 
 </script>    
 {% endblock %}

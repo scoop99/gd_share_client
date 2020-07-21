@@ -2,27 +2,26 @@
 {% block content %}
 
 <div>
-  {{ macros.m_button_group([['folder_upload_btn', '신규 업로드'], ['all_plex_search_btn', '전체 PLEX에서 찾기']])}}
-  {{ macros.m_row_start('1') }}
-  {{ macros.m_row_end() }}
-  {{ macros.m_hr_head_bottom() }}
-
   <form id="form_search" class="form-inline" style="text-align:left">
     <div class="container-fluid">
       <div class="row show-grid">
-        <span class="col-md-3">
-          <select id="option" name="option" class="form-control form-control-sm">
+        <span class="col-md-2">
+          <select id="option_server" name="option_server" class="form-control form-control-sm">
             <option value="all">전체</option>
-            <option value="only_srt">서버-자막만</option>
-            <option value="include_video">서버-영상포함</option>
-            <option value="2">로컬에 영상만 있는 경우</option>
-            <option value="3">서버-영상포함, 로컬 없는 경우</option>
-            <option value="33">강제이동완료</option>
-            <option value="99">검색실패</option>
-            <option value="100">만료</option>
+            <option value="server_only_srt">자막만 있는 자료</option>
+            <option value="server_include_video">영상도 있는 자료</option>
           </select>
         </span>
-        <span class="col-md-3">
+
+        <span class="col-md-2">
+          <select id="option_client" name="option_client" class="form-control form-control-sm">
+            <option value="all">전체</option>
+            <option value="client_plex_no_meta">Plex 정보가 없는 자료</option>
+            <option value="client_plex_exist_meta">Plex 정보가 있는 자료</option>
+          </select>
+        </span>
+
+        <span class="col-md-2">
           <select id="order" name="order" class="form-control form-control-sm">
             <option value="name">이름순</option>
             <option value="name_desc">이름역순</option>
@@ -30,6 +29,8 @@
             <option value="date_desc" selected>발매역순</option>
             <option value="update">업데이트순</option>
             <option value="update_desc">업데이트역순</option>
+            <option value="index">Index순</option>
+            <option value="index_desc">Index역순</option>
           </select>
         </span>
         <span class="col-md-6">
@@ -41,7 +42,6 @@
     </div>
   </form>
   <div id='page1'></div>
-  {{ macros.m_row_start('5') }}
   <div id="list_div"></div>
   <div id='page2'></div>
 </div>
@@ -71,7 +71,8 @@ $("body").on('click', '#page', function(e){
 $("#reset_btn").click(function(e) {
   e.preventDefault();
   document.getElementById("order").value = 'name';
-  document.getElementById("option").value = 'all';
+  document.getElementById("option_server").value = 'all';
+  document.getElementById("option_client").value = 'all';
   document.getElementById("search_word").value = '';
   request_search('1')
 });
@@ -88,6 +89,8 @@ function request_search(page) {
     success: function (data) {
       current_data = data;
       window.scrollTo(0,0);
+      if (page == '1')
+        $.notify('<strong>'+data.paging.count+'개 데이터가 있습니다.</strong>', {type: 'success'});
       make_list(data.list)
       make_page_html(data.paging)
     }
@@ -111,30 +114,25 @@ $("body").on('click', '#json_btn', function(e){
 });
 
 
-// 폴더채 업로드
-$("body").on('click', '#folder_upload_btn', function(e){
-  e.preventDefault();
-  redirect = '/' + package_name + '/' + sub + '/transfer';
-  $.redirectPost(redirect, {mode:'upload', server_type:'category', 'folder_id':'A3U9TczB1ZHNggcuUqJH3V6J4kPd9IYTHSMD+1K7WSQ/Q273vlD852wdUZ1lCImG63UZZHjsst17ytQSu4MARQ==', 'folder_name':'', 'server_filename':''});
-});
+
 
 
 
 
 function make_list(data){
-  //data = ret.data.body.result;
-  // str = '총 ' + data.length + '편';
   str = ''
-  str += '<hr>';
+  str += m_hr();
   str += '<div class="row">';
+
   for (i in data) {
-    console.log(data[i])
+    //console.log(data[i])
     str += '<div class="col-md-2 col-sm-4 col-6">';
     str += '<div class="card mb-2 sm-4 box-shadow">';
+
     if (av_sub_show_poster && data[i].meta_poster != null)
       str += '<img class="card-img-top" src="' + data[i].meta_poster + '" class="img-fluid img-thumbnail">';
     if (data[i].video_count > 0)
-      str += '<div class="card-body text-white bg-dark">';
+      str += '<div class="card-body">';
     else
       str += '<div class="card-body">';
     str += '<p class="card-text">';
@@ -147,25 +145,15 @@ function make_list(data){
     else
       str += '<br>비디오 없음';
     str += '</small>'
-    //str += m_hr();
-    //str += '<hr>';
-    
     str += '<div class="d-flex justify-content-between align-items-center">';
     str += '<div class="btn-group">';
     str += '<button id="more_btn" name="submit" type="button" class="btn btn-sm btn-outline-secondary" data-idx="'+i+'">MORE</button>';
-    str += '<button id="json_btn" name="submit" type="button" class="btn btn-sm btn-outline-secondary" data-idx="'+i+'">JSON</button>';
+    //str += '<button id="json_btn" name="submit" type="button" class="btn btn-sm btn-outline-secondary" data-idx="'+i+'">JSON</button>';
     str += '</div>';
     str += '</div>';
-    
-    /*
-    tmp = m_button('more_btn', 'More', [{'key':'id', 'value':data[i].id}]);
-    tmp += m_button('json_btn', 'JSON', [{'key':'id', 'value':data[i].id}]);
-    tmp = m_button_group(tmp)
-    str += tmp
-    */
-    //str += '<hr style="width: 100%; margin-left:0px; margin-right:0px; margin-top:0px; margin-bottom:1px">'
+
     str += '<hr>';
-    //str += m_hr('10');
+
     str += '<small class="text-muted">';
     if (data[i].meta_actor)
       str += data[i].meta_actor + '<br>';
@@ -175,17 +163,15 @@ function make_list(data){
       str += data[i].meta_title;
     str += '</small>';
     str += '</p>';
-    
-    str += '</div>';
-    str += '</div>';
+    str += '</div>'; //card-body
+    str += '</div>'; //
     str += '</div>';
   }
+  
   str += '</div>';
-
+  str += m_hr();
   document.getElementById("list_div").innerHTML = str;
 }
 
-
 </script>
-
 {% endblock %}
