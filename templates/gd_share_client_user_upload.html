@@ -15,14 +15,14 @@
     {{ macros.setting_input_text_and_buttons('board_daum_url', 'Link URL', [['daum_go_btn', 'Daum Go']], value='') }}
     <div id="daum_info_div"></div>
     
-    {{ macros.setting_input_textarea('board_content', '추가내용', value='', row='5', desc=None) }}
+    {{ macros.setting_input_textarea('board_content', '코멘트', value='', row='5', desc=None) }}
 
     {{ macros.setting_input_hidden('folder_id', '') }}
     {{ macros.setting_input_hidden('size', '0') }}
     {{ macros.setting_input_hidden('folder_name', '') }}
     {{ macros.setting_input_hidden('daum_info', '') }}
     {{ macros.m_hr() }}
-    {{ macros.setting_button([['do_transfer_btn', '실행']], left='서버' ) }}
+    {{ macros.setting_button([['do_transfer_btn', 'copy로 실행'], ['do_transfer_move_btn', 'move로 실행(주의)']], left='Action' ) }}
   </form>
 </div> <!--전체-->
 
@@ -203,9 +203,6 @@ $("body").on('click', '#daum_go_btn', function(e) {
   window.open(url, "_blank");
 });
 
-
-
-
 $("body").on('click', '#do_transfer_btn', function(e) {
   e.preventDefault();
   size = document.getElementById("size").value;
@@ -213,11 +210,29 @@ $("body").on('click', '#do_transfer_btn', function(e) {
     $.notify('<strong>"크기 확인" 을 먼저 진행해주세요.</strong>', {type: 'warning'});
     return;
   }
-  do_action('real');
+  do_action('upload');
 });
+
+
+$("body").on('click', '#do_transfer_move_btn', function(e) {
+  e.preventDefault();
+  size = document.getElementById("size").value;
+  if (size == '0') {
+    $.notify('<strong>"크기 확인" 을 먼저 진행해주세요.</strong>', {type: 'warning'});
+    return;
+  }
+
+  document.getElementById("confirm_title").innerHTML = "move 명령";
+  document.getElementById("confirm_body").innerHTML = "move 명령을 하면 source에서는 파일이 사라집니다.<br>계속 진행 하시겠습니까?";
+  $('#confirm_button').attr('onclick', "do_action('move');");
+  $("#confirm_modal").modal();
+  return;
+});
+
 
 function do_action(action) {
   var formData = get_formdata('#transfer_setting')
+  formData += '&action=' + action;
   $.ajax({
     url: '/' + package_name + '/ajax/'+sub+'/do_action',
     type: "POST", 
@@ -226,6 +241,7 @@ function do_action(action) {
     dataType: "json",
     success: function (data) {
       //m_modal(data);
+      command_modal_show('');
     }
   });
 }
