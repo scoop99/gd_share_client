@@ -169,7 +169,8 @@ $("body").on('click', '#metadata_refresh_btn', function(e){
 
 $("body").on('click', '#plex_go_btn', function(e){
   e.preventDefault();
-  metakey = current_data.plex_metakey;
+  //metakey = current_data.plex_metakey;
+  metakey = current_data.plex_metakey.split(',')[0]
   url = plex_url + '/web/index.html#!/server/' + plex_machineIdentifier + '/details?key=' + metakey;
   url = 'https://app.plex.tv/desktop#!/server/' + plex_machineIdentifier + '/details?key=' + metakey;
 
