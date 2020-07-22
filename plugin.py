@@ -31,11 +31,11 @@ from .logic_user import LogicUser
 blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 
 menu = {
-    'main' : [package_name, '구글 드라이브 공유(Beta)'],
+    'main' : [package_name, '구글 드라이브 공유'],
     'sub' : [
         ['base', '기본'], ['user', '유저공유'], ['av_sub', 'AV 자막영상'], ['log', '로그']
     ],
-    'category' : 'custom',
+    'category' : 'service',
     'sub2' : {
         'base' : [
             ['setting', '기본 설정'], #['list', '목록']
@@ -52,7 +52,7 @@ menu = {
 plugin_info = {
     'version' : '0.1.0.0',
     'name' : 'gd_share_client',
-    'category_name' : 'custom',
+    'category_name' : 'service',
     'developer' : 'soju6jan',
     'description' : '구글 드라이브 공유 클라이언트',
     'home' : 'https://github.com/soju6jan/gd_share_client',
