@@ -52,10 +52,19 @@ var package_name = "{{arg['package_name']}}";
 var sub = "{{arg['sub']}}";
 var current_data = null;
 var av_sub_show_poster = ("{{arg['av_sub_show_poster']}}" == 'True')
-
+var last_list_option = "{{arg['last_list_option']}}";
 
 $(document).ready(function(){
-  request_search('1');
+  tmp = last_list_option.split('|');
+  if (tmp.length == 5) {
+    document.getElementById("order").value = tmp[3];
+    document.getElementById("option_server").value = tmp[1];
+    document.getElementById("option_client").value = tmp[2];
+    document.getElementById("search_word").value = tmp[0];
+    request_search(tmp[4]);
+  } else {
+    request_search('1');
+  }
 });
 
 $("#search").click(function(e) {
