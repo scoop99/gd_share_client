@@ -205,6 +205,35 @@ class LogicAVSub(object):
             logger.error(traceback.format_exc())
 
 
+    @staticmethod
+    def get_path_list(key):
+        tmps = ModelSetting.get_list(key)
+        ret = []
+        for t in tmps:
+            if t.endswith('*'):
+                dirname = os.path.dirname(t)
+                listdirs = os.listdir(dirname)
+                for l in listdirs:
+                    ret.append(os.path.join(dirname, l))
+            else:
+                ret.append(t)
+        return ret
+
+
+    @staticmethod
+    def get_download_remote_path(folder_name):
+        tmps = LogicAVSub.get_path_list('av_sub_library_path')
+        #logger.debug('folder_name: (%s)', folder_name)
+        label = folder_name.split('-')[0].upper()
+        path = os.path.join(ModelSetting.get('av_sub_no_library_path'), label)
+        for t in tmps:
+            tmp_path = os.path.join(t, label)
+            if os.path.isdir(tmp_path):
+                path = tmp_path
+                break
+
+        return LogicAVSub.get_remote_path(path)
+
 
 #########################################################
 # socketio / sub
