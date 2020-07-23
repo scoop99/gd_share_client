@@ -33,6 +33,11 @@ class Logic(object):
         'av_sub_show_poster' : 'False',
         'av_sub_folder_name' : '',
         'av_sub_plex_match_rule' : '',
+
+        'av_sub_library_match' : 'False',
+        'av_sub_library_path' : '',
+        'av_sub_no_library_path' : '',
+
         'last_list_option' : '',
         'user_copy_dest_list' : u'default = \nshare_movie,국내 = \nshare_movie,외국 = \nshare_ktv,드라마 = \nshare_ktv,예능 = \nshare_ktv,교양 = \nshare_ftv = \nshare_etc = ',
     }

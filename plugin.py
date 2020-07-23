@@ -136,6 +136,8 @@ def second_menu(sub, sub2):
                 arg['folder_name'] = '' if 'folder_name' not in request.form else request.form['folder_name']
                 arg['server_filename'] = '' if 'server_filename' not in request.form else request.form['server_filename']
                 arg['defalut_remote_path'] = arg['defalut_remote_path'] if 'remote_path' not in request.form or request.form['remote_path'] == '' else request.form['remote_path']
+                if ModelSetting.get_bool('av_sub_library_match') and arg['mode'] == 'download':
+                    arg['defalut_remote_path'] = LogicAVSub.get_download_remote_path(arg['folder_name'])
                 return render_template('{package_name}_{sub}_{sub2}.html'.format(package_name=package_name, sub=sub, sub2=sub2), arg=arg)
             elif sub2 == 'plex':
                 return render_template('{package_name}_{sub}_{sub2}.html'.format(package_name=package_name, sub=sub, sub2=sub2), arg=arg)
