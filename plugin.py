@@ -31,7 +31,7 @@ from .logic_user import LogicUser
 blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 
 menu = {
-    'main' : [package_name, '구글 드라이브 공유'],
+    'main' : [package_name, '구글 드라이브 공유'], 
     'sub' : [
         ['base', '기본'], ['user', '유저공유'], ['av_sub', 'AV 자막영상'], ['log', '로그']
     ],
@@ -136,7 +136,9 @@ def second_menu(sub, sub2):
                 arg['folder_name'] = '' if 'folder_name' not in request.form else request.form['folder_name']
                 arg['server_filename'] = '' if 'server_filename' not in request.form else request.form['server_filename']
                 arg['defalut_remote_path'] = arg['defalut_remote_path'] if 'remote_path' not in request.form or request.form['remote_path'] == '' else request.form['remote_path']
-                if ModelSetting.get_bool('av_sub_library_match') and arg['mode'] == 'download':
+                # 2020-07-23 by soju
+                # server_filename == '' 인 경우가 폴더채다운로드. server_filename 파일명이 있다면 이미 맞는 remote_path
+                if ModelSetting.get_bool('av_sub_library_match') and arg['mode'] == 'download' and arg['server_filename'] == '':
                     arg['defalut_remote_path'] = LogicAVSub.get_download_remote_path(arg['folder_name'])
                 return render_template('{package_name}_{sub}_{sub2}.html'.format(package_name=package_name, sub=sub, sub2=sub2), arg=arg)
             elif sub2 == 'plex':

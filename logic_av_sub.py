@@ -124,7 +124,7 @@ class LogicAVSub(object):
             return data
              
         except Exception as e: 
-            logger.error('Exception:%s', e)
+            logger.error('Exception:%s', e) 
             logger.error(traceback.format_exc())
 
     @staticmethod
