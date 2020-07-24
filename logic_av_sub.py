@@ -37,11 +37,15 @@ class LogicAVSub(object):
     def process_ajax(sub, req):
         try:
             if sub == 'get_server_list':
+                action = req.form['action']
                 ret = {'ret':False}
                 page = 1
                 count = 0
+                last_updated_time = ModelSetting.get('av_sub_last_updated_time')
+                if action == 'all':
+                    last_updated_time = ''
                 while True:
-                    url = SERVER_URL + '/gd_share_server/noapi/av_sub/list?last_updated_time=%s&page=%s' % (ModelSetting.get('av_sub_last_updated_time'), page)
+                    url = SERVER_URL + '/gd_share_server/noapi/av_sub/list?last_updated_time=%s&page=%s' % (last_updated_time, page)
                     logger.debug(url)
                     data = requests.get(url).json()
                     for item in data['list']:
@@ -55,6 +59,10 @@ class LogicAVSub(object):
                 ret['ret'] = True
                 ret['data'] = count
                 return jsonify(ret)
+            elif sub == 'get_server_count':
+                url = SERVER_URL + '/gd_share_server/noapi/av_sub/count'
+                data = requests.get(url).json()
+                return jsonify(data) 
             elif sub == 'web_list':
                 ret = ModelClientAVSubItem.web_list(req)
                 return jsonify(ret)
