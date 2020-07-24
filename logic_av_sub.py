@@ -53,12 +53,17 @@ class LogicAVSub(object):
                             #logger.debug(item)
                             ModelClientAVSubItem.insert(item)
                             count += 1
-                        if data['paging']['total_page'] == 0 or data['paging']['current_page'] == data['paging']['last_page']:
+                        #if data['paging']['next_page'] == 0 or data['paging']['current_page'] == data['paging']['last_page']:
+                        #logger.debug(data['paging'])
+                        if data['paging']['current_page'] >= data['paging']['total_page']:
                             break
                         page += 1
                     ModelSetting.set('av_sub_last_updated_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S') )
                     ret['ret'] = True
                     ret['data'] = count
+                    if action == 'all':
+                        data = {'type':'info', 'msg' : u'%s개를 업데이트 했습니다.' % count, 'url':''}
+                        socketio.emit("notify", data, namespace='/framework', broadcast=True)
                     return ret
                 if action == 'all':
                     thread = threading.Thread(target=func, args=())
