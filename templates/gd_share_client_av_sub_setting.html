@@ -78,10 +78,14 @@ function get_server_list(action) {
     data: {action:action},
     dataType: "json",
     success: function (data) {
-      if (data.ret) {
-        $.notify('<strong>'+data.data+'개를 업데이트하였습니다.</strong><br>', {type: 'success'});
-      }else {
-        $.notify('<strong>실패하였습니다.</strong><br>', {type: 'warning'});
+      if (action == 'normal') {
+        if (data.ret) {
+          $.notify('<strong>'+data.data+'개를 업데이트하였습니다.</strong>', {type: 'success'});
+        }else {
+          $.notify('<strong>실패하였습니다.</strong><br>', {type: 'warning'});
+        }
+      } else {
+        $.notify('<strong>백그라운드로 진행됩니다. 목록화면에서 확인하세요.</strong>', {type: 'success'});
       }
     }
   });

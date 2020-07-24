@@ -38,27 +38,36 @@ class LogicAVSub(object):
         try:
             if sub == 'get_server_list':
                 action = req.form['action']
-                ret = {'ret':False}
-                page = 1
-                count = 0
                 last_updated_time = ModelSetting.get('av_sub_last_updated_time')
                 if action == 'all':
                     last_updated_time = ''
-                while True:
-                    url = SERVER_URL + '/gd_share_server/noapi/av_sub/list?last_updated_time=%s&page=%s' % (last_updated_time, page)
-                    logger.debug(url)
-                    data = requests.get(url).json()
-                    for item in data['list']:
-                        #logger.debug(item)
-                        ModelClientAVSubItem.insert(item)
-                        count += 1
-                    if data['paging']['total_page'] == 0 or data['paging']['current_page'] == data['paging']['last_page']:
-                        break
-                    page += 1
-                ModelSetting.set('av_sub_last_updated_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S') )
-                ret['ret'] = True
-                ret['data'] = count
-                return jsonify(ret)
+                def func():
+                    ret = {'ret':False}
+                    page = 1
+                    count = 0
+                    while True:
+                        url = SERVER_URL + '/gd_share_server/noapi/av_sub/list?last_updated_time=%s&page=%s' % (last_updated_time, page)
+                        logger.debug(url)
+                        data = requests.get(url).json()
+                        for item in data['list']:
+                            #logger.debug(item)
+                            ModelClientAVSubItem.insert(item)
+                            count += 1
+                        if data['paging']['total_page'] == 0 or data['paging']['current_page'] == data['paging']['last_page']:
+                            break
+                        page += 1
+                    ModelSetting.set('av_sub_last_updated_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S') )
+                    ret['ret'] = True
+                    ret['data'] = count
+                    return ret
+                if action == 'all':
+                    thread = threading.Thread(target=func, args=())
+                    thread.setDaemon(True)
+                    thread.start()
+                    return jsonify(True)
+                else:
+                    ret = func()
+                    return jsonify(ret)
             elif sub == 'get_server_count':
                 url = SERVER_URL + '/gd_share_server/noapi/av_sub/count'
                 data = requests.get(url).json()
