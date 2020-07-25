@@ -105,13 +105,14 @@ class LogicAVSub(object):
                 server_type = 'category' if server_type == '0' else 'content'
                 def func():
                     RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_info'), mode, server_type, folder_id, folder_name, server_filename, remote_path, action, folder_id_encrypted=True)
-                    if mode == 'upload': # and server_type == 'content':
+                    if mode == 'upload' and server_type == 'content':
                         tmp = remote_path.split('/')
                         tmp2 = tmp[-1].split('.')
-                        if tmp2[-1].lower() in ['mp4', 'mkv', 'avi', 'srt']:
+                        if tmp2[-1].lower() in ['mp4', 'mkv', 'avi', 'wmv', 'srt']:
                             url = SERVER_URL + '/gd_share_server/noapi/av_sub/refresh?folder_name=%s' % folder_name
                         else:
-                            url = SERVER_URL + '/gd_share_server/noapi/av_sub/refresh?folder_name=%s' % tmp[-1]
+                            #url = SERVER_URL + '/gd_share_server/noapi/av_sub/refresh?folder_name=%s' % tmp[-1]
+                            pass
                         data = requests.get(url).json()
                     msg = u'모두 완료되었습니다.\n'
                     socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
