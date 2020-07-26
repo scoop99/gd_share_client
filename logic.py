@@ -21,7 +21,7 @@ from .model import ModelSetting
 
 class Logic(object):
     db_default = { 
-        'db_version' : '4',
+        'db_version' : '5',
         'rclone_info' : '', # rclone 
         'size_upload' : '0',
         'size_download' : '0',
@@ -190,6 +190,13 @@ class Logic(object):
                 cursor.execute(query)
                 connection.close()
                 ModelSetting.set('db_version', '4')
+                db.session.flush()
+            if ModelSetting.get('db_version') == '4':
+                from .model import ModelClientAVSubItem, ModelClientAVSubFile
+                db.session.query(ModelClientAVSubItem).delete()
+                db.session.query(ModelClientAVSubFile).delete()
+                db.session.commit()
+                ModelSetting.set('db_version', '5')
                 db.session.flush()
         except Exception as e:
             logger.error('Exception:%s', e)

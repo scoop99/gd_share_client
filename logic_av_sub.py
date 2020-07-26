@@ -124,6 +124,11 @@ class LogicAVSub(object):
                 #return Response(LogicAVSub.plex_search_all(), mimetype="text/event-stream")
                 LogicAVSub.plex_search_all()
                 return jsonify('')
+            elif sub == 'reset_db':
+                db.session.query(ModelClientAVSubItem).delete()
+                db.session.commit()
+                ret = True
+                return jsonify(ret)  
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
