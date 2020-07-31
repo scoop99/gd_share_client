@@ -104,7 +104,7 @@ class LogicAVSub(object):
                 mode = 'download' if mode == '0' else 'upload'
                 server_type = 'category' if server_type == '0' else 'content'
                 def func():
-                    RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_info'), mode, server_type, folder_id, folder_name, server_filename, remote_path, action, folder_id_encrypted=True)
+                    RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), mode, server_type, folder_id, folder_name, server_filename, remote_path, action, folder_id_encrypted=True)
                     if mode == 'upload' and server_type == 'content':
                         tmp = remote_path.split('/')
                         tmp2 = tmp[-1].split('.')

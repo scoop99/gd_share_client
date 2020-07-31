@@ -156,7 +156,7 @@ class LogicUser(object):
 
 
             def func():
-                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_info'), action, 'category', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), action, 'category', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
 
                 msg = u'Percent : %s\n' % ret['percent']
                 socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
@@ -207,7 +207,7 @@ class LogicUser(object):
             if my_remote_path is None:
                 return
             def func():
-                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_info'), 'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
 
                 if ret['percent'] == 100:
                     tmp = ModelSetting.get_int('size_download')

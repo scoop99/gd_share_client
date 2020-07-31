@@ -22,7 +22,6 @@ from .model import ModelSetting
 class Logic(object):
     db_default = { 
         'db_version' : '5',
-        'rclone_info' : '', # rclone 
         'size_upload' : '0',
         'size_download' : '0',
         'rclone_path' : os.path.join(path_app_root, 'bin', platform.system(), 'rclone'),

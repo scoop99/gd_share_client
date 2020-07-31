@@ -42,6 +42,21 @@ class LogicBase(object):
                 remote_path = req.form['remote_path']
                 ret = RcloneTool.size(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), remote_path)
                 return jsonify(ret)
+            elif sub == 'conf_get':
+                rclone_config_path = req.form['rclone_config_path']
+                from framework.common.util import read_file
+                ret = {'ret':False, 'data':''}
+                if os.path.exists(rclone_config_path):
+                    ret['ret'] = True
+                    ret['data'] = read_file(rclone_config_path)
+                return jsonify(ret)
+            elif sub == 'conf_save':
+                rclone_config_path = req.form['rclone_config_path']
+                data = req.form['conf_text']
+                data = data.replace("\r\n", "\n" ).replace( "\r", "\n" )
+                with open(rclone_config_path, 'w') as f: 
+                    f.write(data)
+                return jsonify(True)
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())

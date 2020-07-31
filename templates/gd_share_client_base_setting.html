@@ -14,19 +14,9 @@
   <div class="tab-content" id="nav-tabContent">
     <!-- 일반 -->
     {{ macros.m_tab_content_start('normal', true) }}
-      {{ macros.setting_input_textarea('rclone_info', 'Rclone 리모트 정보', desc=['사용할 구글 드라이브 리모트 정보를 rclone.conf 파일에서 찾아 입력합니다.', 'root_folder_id 값은 없어야 합니다.'], value=arg['rclone_info'], row='12') }}
-      {{ macros.setting_input_text_and_buttons('defalut_remote_path', '기본 리모트 경로', [['rclone_lsjson_btn', '폴더내용 보기']], value=arg['defalut_remote_path'], desc=['전송 화면에 기본적으로 들어갈 값.', 'sjva.me에서 다운로드 버튼 클릭시 컨텐츠가 다운로드 폴더']) }}
-      <!--
-      {{ macros.setting_input_text_and_buttons('remote_info', '리모트 경로', [['rclone_lsjson_btn', '폴더내용 보기']], value='', desc=['지정한 공유폴더의 리모트 경로를 입력합니다.', '이 폴더는 share@sjva.me 계정과 공유되어 있어야 하며 폴더 이름은 ' + '' + '여야합니다.', '하위 폴더로 donwload, upload 폴더가 있어야 합니다.']) }}
-      {{ macros.setting_input_text_and_buttons('share_folder_id', '구글 폴더 ID', [['get_folderid_btn', '가져오기']], value='', disabled=True) }}
-      
-      {{ macros.m_hr() }}
-      {{ macros.info_text_and_buttons('share_available', '공유 가능', [['share_available_confirm_btn', '공유 가능 확인']], value='') }}
-      -->
-      {{ macros.m_hr() }}
       {{ macros.setting_input_text('rclone_path', 'Rclone path',value=arg['rclone_path']) }}
-      {{ macros.setting_input_text('rclone_config_path', 'Rclone config path',value=arg['rclone_config_path'], desc=['내용보기, 크기확인 등에서 사용합니다.', 'root_folder_id 값이 root가 아닌 경우에는 설정값을 삭제한 후 전체 경로로 사용하길 권장합니다.']) }}
-
+      {{ macros.setting_input_text_and_buttons('rclone_config_path', 'Rclone config path', [['rclone_conf_edit_btn', '편집']], value=arg['rclone_config_path'], desc=['root_folder_id 값이 root가 아닌 경우에는 설정값을 삭제한 후 전체 경로로 사용하길 권장합니다.']) }}
+      {{ macros.setting_input_text_and_buttons('defalut_remote_path', '기본 리모트 경로', [['rclone_lsjson_btn', '폴더내용 보기']], value=arg['defalut_remote_path'], desc=['전송 화면에 기본적으로 들어갈 값.']) }}
       {{ macros.m_hr() }}
       {{ macros.info_text('count_upload', 'Upload Size', value=arg['size_upload'], desc=None ) }}
       {{ macros.info_text('count_download', 'Download Size', value=arg['size_download'], desc=None ) }}
@@ -34,6 +24,29 @@
   </div><!--tab-content-->
   </form>
 </div> <!--전체-->
+
+<!-- Modal -->
+<div class="modal fade" id="conf_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal_title">rclone.conf</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body" id="modal_body" style="word-break:break-all;">
+        <form id="conf_form" name="conf_form">
+          <div class="input-group col-sm-12">
+            <textarea id="conf_text" name="conf_text" class="col-md-12" rows="40"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="modal_save_btn" type="button" class="btn btn-primary">저장</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 <script type="text/javascript">
@@ -59,25 +72,47 @@ $("body").on('click', '#rclone_lsjson_btn', function(e) {
   });
 });
 
-$("body").on('click', '#get_folderid_btn', function(e) {
+$("body").on('click', '#rclone_conf_edit_btn', function(e) {
   e.preventDefault();
-  remote_path = document.getElementById('remote_info').value;
+  rclone_config_path = document.getElementById('rclone_config_path').value;
   $.ajax({
-    url: '/' + package_name + '/ajax/'+sub+'/get_folderid',
+    url: '/' + package_name + '/ajax/'+sub+'/conf_get',
     type: "POST", 
     cache: false,
-    data: {remote_path:remote_path},
+    data: {rclone_config_path:rclone_config_path},
     dataType: "json",
     success: function (data) {
       if (data.ret) {
-        document.getElementById('share_folder_id').value = data.data;
-        $.notify('<strong>폴더ID를 가져왔습니다. <br>'+data.data+'</strong><br>', {type: 'success'});
+        document.getElementById("conf_text").value = data.data;
+        $("#conf_modal").modal();
       }else {
         $.notify('<strong>실패하였습니다.<br>'+data.data+'</strong><br>', {type: 'warning'});
       }
     }
   });
 });
+
+$("body").on('click', '#modal_save_btn', function(e) {
+  e.preventDefault();
+  conf_text = document.getElementById('conf_text').value;
+  rclone_config_path = document.getElementById('rclone_config_path').value;
+  $.ajax({
+    url: '/' + package_name + '/ajax/'+sub+'/conf_save',
+    type: "POST", 
+    cache: false,
+    data: {conf_text:conf_text, rclone_config_path:rclone_config_path},
+    dataType: "json",
+    success: function (ret) {
+      if (ret) {
+        $.notify('<strong>저장하였습니다.</strong>', {type: 'warning'});
+        $("#conf_modal").modal('hide');
+      }else {
+        $.notify('<strong>실패하였습니다.</strong>', {type: 'warning'});
+      }
+    }
+  });
+});
+
 
 </script>    
 {% endblock %}
