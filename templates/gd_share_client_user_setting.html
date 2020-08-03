@@ -16,6 +16,7 @@
     
     {{ macros.m_tab_content_start('normal', true) }}
       {{ macros.setting_input_textarea('user_copy_dest_list', 'Copy Dest 리모트 정보', desc=['copy 리모트 정보', '형식 : 게시판이름,카테고리 = 리모트경로', '예) share_movie,국내 = my_remote:/video/movie/download', '게시판이름,카테고리가 정보가 있는 경우 설정된 곳으로 복사합니다.', '게시판이름만 있는 경우 카테고리에 상관없이 설정된 값에 복사합니다.', '정보가 없는 경우 default 에 복사합니다. default 값은 필수입니다.'], value=arg['user_copy_dest_list'], row='12') }}
+      {{ macros.setting_input_text('user_plex_match_rule', 'PLEX 변환규칙', value=arg['user_plex_match_rule'], desc=['Plex 사용시 입력. 형식: remote 경로|Plex 상의 경로', '예: gdrive:/|N: (구글드라이브 루트가 Plex 서버에서 N:으로 매칭)', '예: my_remote:/av|/volume1/gdrive/av (구글드라이브 av 폴더가 시놀 /voluem1/gdrive/av 폴더로 매칭)']) }}
 
     {{ macros.m_tab_content_end() }}
   </div><!--tab-content-->
