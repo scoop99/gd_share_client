@@ -69,6 +69,10 @@ class LogicUser(object):
                 board_type = req.form['board_type']
                 ret = LogicUser.daum_info(title, board_type)
                 return jsonify(ret)
+            elif sub == 'search_plex':
+                keyword = req.form['keyword']
+                ret = LogicUser.search_plex(keyword)
+                return jsonify(ret)
             elif sub == 'do_action':
                 ret = LogicUser.do_action(req)
                 return jsonify(ret)
@@ -246,6 +250,48 @@ class LogicUser(object):
                     logger.debug(key)
                     logger.debug(remote_list[key])
                     return remote_list[key]
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+    @staticmethod
+    def get_remote_path(filepath):
+        try:
+            rule = ModelSetting.get('user_plex_match_rule')
+            if rule is not None:
+                tmp = rule.split('|')
+                ret = filepath.replace(tmp[1], tmp[0])
+                if filepath[0] != '/':
+                    ret = ret.replace('\\', '/')
+                return ret.replace('//', '/').replace('\\\\', '\\')
+
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+    
+    @staticmethod
+    def search_plex(keyword):
+        import plex
+        try:
+            data = plex.LogicNormal.find_by_filename_part(keyword)
+            ret  = dict()
+            ndirs  = 0
+            nfiles = 0
+            #logger.debug(data)
+            if len(data['list']) > 0:
+                for item in data['list']:
+                    if item['dir'] in ret:
+                        f = ret[item['dir']]['files']
+                        f.append({'filename': item['filename'], 'size_str':item['size_str']})
+                    else:
+                        remote_path = LogicUser.get_remote_path(item['dir'])
+                        ret[item['dir']] = {'remote_path': remote_path, 'files': [{'filename': item['filename'], 'size_str':item['size_str']}]}
+
+                ndirs = len(ret)
+                for k, v in ret.items(): nfiles = nfiles + len(v['files'])
+            logger.debug('search plex: keyword(%s), result(%d dirs, %d files)', keyword, ndirs, nfiles)
+            return ret
+
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())

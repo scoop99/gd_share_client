@@ -39,6 +39,7 @@ class Logic(object):
 
         'last_list_option' : '',
         'user_copy_dest_list' : u'default = \nshare_movie,국내 = \nshare_movie,외국 = \nshare_ktv,드라마 = \nshare_ktv,예능 = \nshare_ktv,교양 = \nshare_ftv = \nshare_etc = ',
+        'user_plex_match_rule': '',
     }
 
     @staticmethod
