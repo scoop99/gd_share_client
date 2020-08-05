@@ -99,6 +99,21 @@ class LogicUser(object):
                     ret['ret'] = 'success'
                     ret['data'] = my_remote_path
                 return jsonify(ret)
+            elif sub == 'torrent_copy':
+                folder_id = req.form['folder_id']
+                board_type = req.form['board_type']
+                category_type = req.form['category_type']
+
+                my_remote_path = LogicUser.torrent_copy(folder_id, board_type, category_type)
+                ret = {}
+                if my_remote_path is None:
+                    ret['ret'] = 'fail'
+                    ret['data'] = 'remote path is None!!'
+                else:
+                    ret['ret'] = 'success'
+                    ret['data'] = my_remote_path
+                return jsonify(ret)
+
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
@@ -227,6 +242,26 @@ class LogicUser(object):
             return my_remote_path
             
             
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+    @staticmethod
+    def torrent_copy(folder_id, board_type, category_type):
+        try:
+            my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
+            if my_remote_path is None:
+                return
+            def func():
+                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+
+                msg = u'모두 완료되었습니다.'
+                socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+
+            thread = threading.Thread(target=func, args=())
+            thread.setDaemon(True)
+            thread.start()
+            return my_remote_path
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
