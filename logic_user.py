@@ -247,9 +247,10 @@ class LogicUser(object):
             logger.error(traceback.format_exc())
 
     @staticmethod
-    def torrent_copy(folder_id, board_type, category_type):
+    def torrent_copy(folder_id, board_type, category_type, my_remote_path=None):
         try:
-            my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
+            if my_remote_path is None:
+                my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
             if my_remote_path is None:
                 return
             def func():
