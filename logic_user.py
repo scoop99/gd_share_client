@@ -225,20 +225,29 @@ class LogicUser(object):
             my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
             if my_remote_path is None:
                 return
-            def func():
-                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+            if my_remote_path.startswith('gc:'):
+                try:
+                    from rclone_expand.logic_gclone import LogicGclone
+                    tmp = ['gc:{%s}|%s/%s' % (RcloneTool.folderid_decrypt(folder_id), my_remote_path, folder_name)]
+                    LogicGclone.queue_append(tmp)
+                except Exception as e: 
+                    logger.error('Exception:%s', e)
+                    logger.error(traceback.format_exc())
+            else:
+                def func():
+                    ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
 
-                if ret['percent'] == 100:
-                    tmp = ModelSetting.get_int('size_download')
-                    tmp += size
-                    ModelSetting.set('size_download', str(tmp))
+                    if ret['percent'] == 100:
+                        tmp = ModelSetting.get_int('size_download')
+                        tmp += size
+                        ModelSetting.set('size_download', str(tmp))
 
-                msg = u'모두 완료되었습니다.'
-                socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                    msg = u'모두 완료되었습니다.'
+                    socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
 
-            thread = threading.Thread(target=func, args=())
-            thread.setDaemon(True)
-            thread.start()
+                thread = threading.Thread(target=func, args=())
+                thread.setDaemon(True)
+                thread.start()
             return my_remote_path
             
             
@@ -253,15 +262,24 @@ class LogicUser(object):
                 my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
             if my_remote_path is None:
                 return
-            def func():
-                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+            if my_remote_path.startswith('gc:'):
+                try:
+                    from rclone_expand.logic_gclone import LogicGclone
+                    tmp = ['gc:{%s}|%s' % (RcloneTool.folderid_decrypt(folder_id), my_remote_path)]
+                    LogicGclone.queue_append(tmp)
+                except Exception as e: 
+                    logger.error('Exception:%s', e)
+                    logger.error(traceback.format_exc())
+            else:
+                def func():
+                    ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
 
-                msg = u'모두 완료되었습니다.'
-                socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                    msg = u'모두 완료되었습니다.'
+                    socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
 
-            thread = threading.Thread(target=func, args=())
-            thread.setDaemon(True)
-            thread.start()
+                thread = threading.Thread(target=func, args=())
+                thread.setDaemon(True)
+                thread.start()
             return my_remote_path
         except Exception as e: 
             logger.error('Exception:%s', e)
