@@ -262,6 +262,9 @@ class LogicUser(object):
                 my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
             if my_remote_path is None:
                 return
+            # 시간차이가 있어서 바로 다운로드가 안되는 문제 발생
+            # 폴더id의 내용이 있는지 확인
+            
             if my_remote_path.startswith('gc:'):
                 try:
                     from rclone_expand.logic_gclone import LogicGclone
