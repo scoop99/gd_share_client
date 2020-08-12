@@ -163,7 +163,7 @@ class LogicUser(object):
             board_title = req.form['board_title']
             board_content = req.form['board_content']
             board_daum_url = req.form['board_daum_url']
-            folder_name = req.form['folder_name']
+            folder_name = req.form['folder_name'] 
 
             size = int(req.form['size'])
             daum_info = req.form['daum_info']
@@ -175,7 +175,7 @@ class LogicUser(object):
 
 
             def func():
-                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), action, 'category', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), action, 'category', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
 
                 msg = u'Percent : %s\n' % ret['percent']
                 socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
