@@ -276,7 +276,9 @@ class LogicUser(object):
             else:
                 def func():
                     for i in range(1, 11):
+                        logger.debug('토렌트 다운로드 시도 : %s %s', i, folder_id)
                         ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+                        logger.debug(ret)
                         if ret['percent'] == 0:
                             msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/20)' % i
                             socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
@@ -285,7 +287,7 @@ class LogicUser(object):
                             msg = u'모두 완료되었습니다.'
                             socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
                             break
-
+                        logger.debug(msg)
                 thread = threading.Thread(target=func, args=())
                 thread.setDaemon(True)
                 thread.start()
