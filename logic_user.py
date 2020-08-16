@@ -188,14 +188,16 @@ class LogicUser(object):
                     tmp = ModelSetting.get_int('size_upload')
                     tmp += size
                     ModelSetting.set('size_upload', str(tmp))
-
-                    if board_type != 'share_private':
+                    logger.debug('폴더ID:%s', ret['folder_id'])
+                    if board_type != 'share_private' and ret['folder_id'] != '':
                         msg = u'게시물 등록중...\n'
                         socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
                         
                         data = {'board_type' : board_type, 'category_type':category_type, 'board_title':board_title, 'board_content':board_content, 'board_daum_url' : board_daum_url, 'folder_name':folder_name, 'size':size, 'daum_info':daum_info, 'folder_id':ret['folder_id'], 'user_id':user_id, 'lsjson' : json.dumps(ret['lsjson'])}
                         LogicUser.site_append(data)
-                
+                    else:
+                        msg = u'업로드한 폴더ID값을 가져올 수 없어서 사이트 등록에 실패하였습니다.\n관리자에게 등록 요청하세요.\n'
+                        socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
                 msg = u'모두 완료되었습니다.\n'
                 socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
 
@@ -275,7 +277,7 @@ class LogicUser(object):
                     logger.error(traceback.format_exc())
             else:
                 def func():
-                    for i in range(1, 11):
+                    for i in range(1, 21):
                         logger.debug('토렌트 다운로드 시도 : %s %s', i, folder_id)
                         ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
                         logger.debug(ret)
