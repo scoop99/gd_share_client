@@ -18,7 +18,7 @@ from system.model import ModelSetting as SystemModelSetting
 # 패키지
 package_name = __name__.split('.')[0]
 logger = get_logger(package_name)
-SERVER_URL = 'https://sjva-dev.soju6jan.com'
+SERVER_URL = 'https://sjva.soju6jan.com'
 
 from .model import ModelSetting
 from .logic import Logic
