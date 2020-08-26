@@ -18,7 +18,7 @@ from system.model import ModelSetting as SystemModelSetting
 # 패키지
 package_name = __name__.split('.')[0]
 logger = get_logger(package_name)
-SERVER_URL = 'https://sjva.soju6jan.com'
+SERVER_URL = 'https://sjva-server.soju6jan.com'
 
 from .model import ModelSetting
 from .logic import Logic
@@ -29,6 +29,7 @@ from .logic_user import LogicUser
 #########################################################
 
 blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
+
 
 menu = {
     'main' : [package_name, '구글 드라이브 공유'], 
@@ -49,6 +50,7 @@ menu = {
     },
 }
 
+
 plugin_info = {
     'version' : '0.1.0.0',
     'name' : 'gd_share_client',
@@ -57,10 +59,15 @@ plugin_info = {
     'description' : '구글 드라이브 공유 클라이언트',
     'home' : 'https://github.com/soju6jan/gd_share_client',
     'more' : '',
-    'policy_level' : 4,
+    'policy_level' : 3,
 }
 
+plugin_small = True if app.config['config']['level'] < 4 else False
+
 def plugin_load():
+    if plugin_small:
+        del(menu['sub'][2])
+        del(menu['sub2']['user'][1])
     Logic.plugin_load()
 
 def plugin_unload():
@@ -88,6 +95,8 @@ def first_menu(sub):
         elif sub == 'av_sub':
             return redirect('/%s/%s/setting' % (package_name, sub))
         elif sub == 'user':
+            if plugin_small:
+                return redirect('/%s/%s/setting' % (package_name, sub))
             return redirect('/%s/%s/upload' % (package_name, sub))
         elif sub == 'log':
             return render_template('log.html', package=package_name)
