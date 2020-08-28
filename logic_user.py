@@ -35,6 +35,7 @@ category_list = [
     { 'type' : 'share_movie', 'name' : u'영화', 'list' : [
         [u'국내', '+3GSRdSQqijI/FUenjzYeuLwvpTQSWsP21UbPT1LCi7yxz3n3M6KpmkfIAkU4W3uRZFMwMET0R5J2kkpq8mk6Q=='], 
         [u'외국', 't7KWVIHwgW/96Pjd/poo+tVmAgMyIt/Cga83rOLQqK5T0jh/OGKzt9Csvbfr4vfcPvoJ8o8cd8AaEHC5iLtx1Q=='],
+        [u'최신', 'MBoXLEq8fKHgb+XaQk52I+Q032HSO9LGCcSw7HBtB4CME2uXSlS4hd/uZpEWjuzN/9GWaZLFhSjQsxvdTmAVHw=='],
     ]},
     { 'type' : 'share_ktv', 'name' : u'국내TV(종영)', 'list' : [
         [u'드라마', 'dwlfA65x2nuOamUMGWiWtAhsPrZAlZSeJn4EtJv7X9xhnSOtrNT3Z9yndlej2bYDgB+8IlDRH5/mmmqCBLu2Mw=='], 
