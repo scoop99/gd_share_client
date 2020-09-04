@@ -266,7 +266,7 @@ class LogicUser(object):
             logger.error(traceback.format_exc())
 
     @staticmethod
-    def torrent_copy(folder_id, board_type, category_type, my_remote_path=None):
+    def torrent_copy(folder_id, board_type, category_type, my_remote_path=None, callback=None, callback_id=None):
         try:
             if my_remote_path is None:
                 my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
@@ -283,6 +283,7 @@ class LogicUser(object):
                 except Exception as e: 
                     logger.error('Exception:%s', e)
                     logger.error(traceback.format_exc())
+                return 'gclone'
             else:
                 def func():
                     for i in range(1, 21):
@@ -296,12 +297,15 @@ class LogicUser(object):
                         else:
                             msg = u'모두 완료되었습니다.'
                             socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                            if callback is not None:
+                                callback(callback_id)
                             break
                         logger.debug(msg)
                 thread = threading.Thread(target=func, args=())
                 thread.setDaemon(True)
                 thread.start()
-            return my_remote_path
+                return 'rclone'
+            #return my_remote_path
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
