@@ -235,29 +235,29 @@ class LogicUser(object):
             my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
             if my_remote_path is None:
                 return
-            if my_remote_path.startswith('gc:'):
-                try:
-                    from rclone_expand.logic_gclone import LogicGclone
-                    tmp = ['gc:{%s}|%s/%s' % (RcloneTool.folderid_decrypt(folder_id), my_remote_path, folder_name)]
-                    LogicGclone.queue_append(tmp)
-                except Exception as e: 
-                    logger.error('Exception:%s', e)
-                    logger.error(traceback.format_exc())
-            else:
-                def func():
-                    ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+            #if my_remote_path.startswith('gc:'):
+            #    try:
+            #        from rclone_expand.logic_gclone import LogicGclone
+            #        tmp = ['gc:{%s}|%s/%s' % (RcloneTool.folderid_decrypt(folder_id), my_remote_path, folder_name)]
+            #        LogicGclone.queue_append(tmp)
+            #    except Exception as e: 
+            #        logger.error('Exception:%s', e)
+            #        logger.error(traceback.format_exc())
+            #else:
+            def func():
+                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
 
-                    if ret['percent'] == 100:
-                        tmp = ModelSetting.get_int('size_download')
-                        tmp += size
-                        ModelSetting.set('size_download', str(tmp))
+                if ret['percent'] == 100:
+                    tmp = ModelSetting.get_int('size_download')
+                    tmp += size
+                    ModelSetting.set('size_download', str(tmp))
 
-                    msg = u'모두 완료되었습니다.'
-                    socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                msg = u'모두 완료되었습니다.'
+                socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
 
-                thread = threading.Thread(target=func, args=())
-                thread.setDaemon(True)
-                thread.start()
+            thread = threading.Thread(target=func, args=())
+            thread.setDaemon(True)
+            thread.start()
             return my_remote_path
             
             
@@ -275,36 +275,36 @@ class LogicUser(object):
             # 시간차이가 있어서 바로 다운로드가 안되는 문제 발생
             # 폴더id의 내용이 있는지 확인
             
-            if my_remote_path.startswith('gc:'):
-                try:
-                    from rclone_expand.logic_gclone import LogicGclone
-                    tmp = ['gc:{%s}|%s' % (RcloneTool.folderid_decrypt(folder_id), my_remote_path)]
-                    LogicGclone.queue_append(tmp)
-                except Exception as e: 
-                    logger.error('Exception:%s', e)
-                    logger.error(traceback.format_exc())
-                return 'gclone'
-            else:
-                def func():
-                    for i in range(1, 21):
-                        logger.debug('토렌트 다운로드 시도 : %s %s', i, folder_id)
-                        ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
-                        logger.debug(ret)
-                        if ret['percent'] == 0:
-                            msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/20)' % i
-                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
-                            time.sleep(30)
-                        else:
-                            msg = u'모두 완료되었습니다.'
-                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
-                            if callback is not None:
-                                callback(callback_id)
-                            break
-                        logger.debug(msg)
-                thread = threading.Thread(target=func, args=())
-                thread.setDaemon(True)
-                thread.start()
-                return 'rclone'
+            #if my_remote_path.startswith('gc:'):
+            #    try:
+            #        from rclone_expand.logic_gclone import LogicGclone
+            #        tmp = ['gc:{%s}|%s' % (RcloneTool.folderid_decrypt(folder_id), my_remote_path)]
+            #        LogicGclone.queue_append(tmp)
+            #    except Exception as e: 
+            #        logger.error('Exception:%s', e)
+            #        logger.error(traceback.format_exc())
+            #    return 'gclone'
+            #else:
+            def func():
+                for i in range(1, 21):
+                    logger.debug('토렌트 다운로드 시도 : %s %s', i, folder_id)
+                    ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+                    logger.debug(ret)
+                    if ret['percent'] == 0:
+                        msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/20)' % i
+                        socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                        time.sleep(30)
+                    else:
+                        msg = u'모두 완료되었습니다.'
+                        socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                        if callback is not None:
+                            callback(callback_id)
+                        break
+                    logger.debug(msg)
+            thread = threading.Thread(target=func, args=())
+            thread.setDaemon(True)
+            thread.start()
+            return 'rclone'
             #return my_remote_path
         except Exception as e: 
             logger.error('Exception:%s', e)
