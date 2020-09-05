@@ -98,7 +98,7 @@ class LogicUser(object):
                 category_type = req.form['category_type']
                 size = int(req.form['size'])
 
-                my_remote_path = LogicUser.copy(folder_id, folder_name, size, board_type, category_type)
+                my_remote_path = LogicUser.copy(folder_id, folder_name, size, board_type, category_type,)
                 ret = {}
                 if my_remote_path is None:
                     ret['ret'] = 'fail'
@@ -245,7 +245,7 @@ class LogicUser(object):
             #        logger.error(traceback.format_exc())
             #else:
             def func():
-                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=ModelSetting.get_bool('show_modal'), option=ModelSetting.get_list('user_option', ' '))
 
                 if ret['percent'] == 100:
                     tmp = ModelSetting.get_int('size_download')
@@ -315,7 +315,7 @@ class LogicUser(object):
     @staticmethod
     def get_my_copy_path(board_type, category_type):
         try:
-            tmp = ModelSetting.get_list('user_copy_dest_list')
+            tmp = ModelSetting.get_list('user_copy_dest_list', '\n')
             logger.debug(tmp)
             remote_list = {}
             for t in tmp:
