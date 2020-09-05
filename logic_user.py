@@ -266,7 +266,7 @@ class LogicUser(object):
             logger.error(traceback.format_exc())
 
     @staticmethod
-    def torrent_copy(folder_id, board_type, category_type, my_remote_path=None, callback=None, callback_id=None):
+    def torrent_copy(folder_id, board_type, category_type, my_remote_path=None, callback=None, callback_id=None, show_modal=False):
         try:
             if my_remote_path is None:
                 my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
@@ -288,19 +288,21 @@ class LogicUser(object):
             def func():
                 for i in range(1, 21):
                     logger.debug('토렌트 다운로드 시도 : %s %s', i, folder_id)
-                    ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
-                    logger.debug(ret)
+                    ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=show_modal)
+                    #logger.debug(ret)
                     if ret['percent'] == 0:
-                        msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/20)' % i
-                        socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                        if show_modal:
+                            msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/20)' % i
+                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
                         time.sleep(30)
                     else:
-                        msg = u'모두 완료되었습니다.'
-                        socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                        if show_modal:
+                            msg = u'모두 완료되었습니다.'
+                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
                         if callback is not None:
                             callback(callback_id)
                         break
-                    logger.debug(msg)
+                    #logger.debug(msg)
             thread = threading.Thread(target=func, args=())
             thread.setDaemon(True)
             thread.start()
