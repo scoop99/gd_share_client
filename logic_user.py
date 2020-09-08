@@ -121,7 +121,20 @@ class LogicUser(object):
                     ret['ret'] = 'success'
                     ret['data'] = my_remote_path
                 return jsonify(ret)
-
+            elif sub == 'vod_copy':
+                fileid = req.form['fileid']
+                board_type = req.form['board_type']
+                category_type = req.form['category_type']
+                my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
+                ret = {}
+                if my_remote_path is None:
+                    ret['ret'] = 'fail'
+                    ret['data'] = 'remote path is None!!'
+                else:
+                    ret['ret'] = 'success'
+                    ret['data'] = my_remote_path
+                    LogicUser.vod_copy(fileid, my_remote_path)
+                return jsonify(ret)
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
@@ -316,20 +329,15 @@ class LogicUser(object):
     def get_my_copy_path(board_type, category_type):
         try:
             tmp = ModelSetting.get_list('user_copy_dest_list', '\n')
-            logger.debug(tmp)
             remote_list = {}
             for t in tmp:
                 t2 = t.split('=')
                 if len(t2) == 2 and t2[1].strip() != '':
                     remote_list[t2[0].strip()] = t2[1].strip()
-            logger.debug(remote_list)
             keys = [u'%s,%s' % (board_type, category_type), u'%s' % (board_type), 'default']
 
-            logger.debug(keys)
             for key in keys:
                 if key in remote_list:
-                    logger.debug(key)
-                    logger.debug(remote_list[key])
                     return remote_list[key]
         except Exception as e: 
             logger.error('Exception:%s', e)
@@ -373,6 +381,26 @@ class LogicUser(object):
             logger.debug('search plex: keyword(%s), result(%d dirs, %d files)', keyword, ndirs, nfiles)
             return ret
 
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+
+    @staticmethod
+    def vod_copy(fileid, remote_path):
+        try:
+            if remote_path is None:
+                return
+            def func():
+                for i in range(1, 21):
+                    logger.debug('VOD 다운로드 시도 : %s %s', i, fileid)
+                    ret = RcloneTool.fileid_copy(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), fileid, remote_path)
+                    if ret:
+                        break
+                    time.sleep(30)
+            thread = threading.Thread(target=func, args=())
+            thread.setDaemon(True)
+            thread.start()
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
