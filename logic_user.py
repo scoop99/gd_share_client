@@ -112,7 +112,7 @@ class LogicUser(object):
                 board_type = req.form['board_type']
                 category_type = req.form['category_type']
 
-                my_remote_path = LogicUser.torrent_copy(folder_id, board_type, category_type)
+                my_remote_path = LogicUser.torrent_copy(folder_id, board_type, category_type, show_modal=True)
                 ret = {}
                 if my_remote_path is None:
                     ret['ret'] = 'fail'
