@@ -42,6 +42,7 @@ class Logic(object):
         'user_plex_match_rule': '',
         'show_modal' : 'True',
         'user_option' : '',
+        'force_remote_name' : '',
 
 
     }

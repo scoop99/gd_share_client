@@ -19,6 +19,8 @@
       {{ macros.setting_input_textarea('user_option', '다운로드시 추가 옵션', value=arg['user_option'], row=5, desc=['fclone : --check-first --checkers 64 --transfers 64 --ignore-existing --drive-pacer-min-sleep 1ms']) }}
       {{ macros.setting_input_text_and_buttons('defalut_remote_path', '기본 리모트 경로', [['rclone_lsjson_btn', '폴더내용 보기']], value=arg['defalut_remote_path'], desc=['전송 화면에 기본적으로 들어갈 값.']) }}
       {{ macros.setting_checkbox('show_modal', '복사시 팝업창 표시', value=arg['show_modal'], desc=None ) }}
+      {{ macros.setting_input_text('force_remote_name', '구글 리모트 이름',value=arg['force_remote_name'], col='3', desc=['crypt나 local 혹은 구글 이외의 리모트로 받을 때 구글 리모트 이름을 지정해야 합니다.', 'type = drive 인 리모트 이름', '구글 리모트에 받을 때는 필요 없습니다.']) }}
+
       {{ macros.m_hr() }}
       {{ macros.info_text('count_upload', 'Upload Size', value=arg['size_upload'], desc=None ) }}
       {{ macros.info_text('count_download', 'Download Size', value=arg['size_download'], desc=None ) }}

@@ -196,7 +196,7 @@ class LogicUser(object):
 
 
             def func():
-                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), action, 'category', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None)
+                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), action, 'category', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, force_remote_name=ModelSetting.get('force_remote_name'))
 
                 msg = u'Percent : %s\n' % ret['percent']
                 socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
@@ -258,7 +258,7 @@ class LogicUser(object):
             #        logger.error(traceback.format_exc())
             #else:
             def func():
-                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=ModelSetting.get_bool('show_modal'), option=ModelSetting.get_list('user_option', ' '))
+                ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, folder_name, '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=ModelSetting.get_bool('show_modal'), option=ModelSetting.get_list('user_option', ' '), force_remote_name=ModelSetting.get('force_remote_name'))
 
                 if ret['percent'] == 100:
                     tmp = ModelSetting.get_int('size_download')
@@ -301,7 +301,7 @@ class LogicUser(object):
             def func():
                 for i in range(1, 21):
                     logger.debug('토렌트 다운로드 시도 : %s %s', i, folder_id)
-                    ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=show_modal)
+                    ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=show_modal, force_remote_name=ModelSetting.get('force_remote_name'))
                     #logger.debug(ret)
                     if ret['percent'] == 0:
                         if show_modal:
