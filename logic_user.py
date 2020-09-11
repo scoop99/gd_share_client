@@ -135,6 +135,22 @@ class LogicUser(object):
                     ret['data'] = my_remote_path
                     LogicUser.vod_copy(fileid, my_remote_path)
                 return jsonify(ret)
+            elif sub == 'copy_with_json':
+                fileid = req.form['fileid']
+                board_type = req.form['board_type']
+                category_type = req.form['category_type']
+                my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
+                my_remote_path = LogicUser.copy_with_json(fileid, my_remote_path, show_modal=True)
+                ret = {}
+                if my_remote_path is None:
+                    ret['ret'] = 'fail'
+                    ret['data'] = 'remote path is None!!'
+                else:
+                    ret['ret'] = 'success'
+                    ret['data'] = my_remote_path
+                return jsonify(ret)
+
+
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
@@ -299,7 +315,7 @@ class LogicUser(object):
             #    return 'gclone'
             #else:
             def func():
-                for i in range(1, 21):
+                for i in range(1, 11):
                     logger.debug('토렌트 다운로드 시도 : %s %s', i, folder_id)
                     ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=show_modal, force_remote_name=ModelSetting.get('force_remote_name'))
                     #logger.debug(ret)
@@ -392,7 +408,7 @@ class LogicUser(object):
             if remote_path is None:
                 return
             def func():
-                for i in range(1, 21):
+                for i in range(1, 11):
                     logger.debug('VOD 다운로드 시도 : %s %s', i, fileid)
                     ret = RcloneTool.fileid_copy(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), fileid, remote_path)
                     if ret:
@@ -404,3 +420,46 @@ class LogicUser(object):
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
+
+
+
+
+
+
+    @staticmethod
+    def copy_with_json(fileid, my_remote_path, show_modal=False):
+        try:
+            if my_remote_path is None:
+                return
+            
+            def func():
+                #for i in range(1, 11):
+                    #ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=show_modal, force_remote_name=ModelSetting.get('force_remote_name'))
+
+                    ret = RcloneTool.copy_with_json(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), fileid, my_remote_path,  show_modal=show_modal)
+
+                    #logger.debug(ret)
+                    """
+                    if ret['percent'] == 0:
+                        if show_modal:
+                            msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/10)' % i
+                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                        time.sleep(30)
+                    else:
+                        if show_modal:
+                            msg = u'모두 완료되었습니다.'
+                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                        if callback is not None:
+                            callback(callback_id)
+                        break
+                    """
+                    #logger.debug(msg)
+            thread = threading.Thread(target=func, args=())
+            thread.setDaemon(True)
+            thread.start()
+            return my_remote_path
+            #return my_remote_path
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
