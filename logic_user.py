@@ -321,7 +321,7 @@ class LogicUser(object):
                     #logger.debug(ret)
                     if ret['percent'] == 0:
                         if show_modal:
-                            msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/20)' % i
+                            msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/10)' % i
                             socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
                         time.sleep(30)
                     else:
