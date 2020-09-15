@@ -312,9 +312,6 @@ class LogicUser(LogicModuleBase):
                 return ret
             
             
-
-
-
             
             item = ModelShareItem()
             item.copy_type = 'share'
