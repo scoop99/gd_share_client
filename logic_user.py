@@ -125,7 +125,11 @@ class LogicUser(LogicModuleBase):
                 category_type = req.form['category_type']
                 size = int(req.form['size'])
                 count = int(req.form['count'])
-                ret = self.add_copy(folder_id, folder_name, board_type, category_type, size, count)
+                ddns = req.form['ddns']
+                if ddns != SystemModelSetting.get('ddns'):
+                    ret = {'ret':'wrong_ddns'}
+                else:
+                    ret = self.add_copy(folder_id, folder_name, board_type, category_type, size, count)
                 return jsonify(ret)
             elif sub == 'torrent_copy':
                 folder_id = req.form['folder_id']
@@ -306,6 +310,11 @@ class LogicUser(LogicModuleBase):
             if not can_use_share_flag:
                 ret['ret'] = 'cannot_access'
                 return ret
+            
+            
+
+
+
             
             item = ModelShareItem()
             item.copy_type = 'share'
