@@ -303,7 +303,7 @@ class LogicUser(LogicModuleBase):
                 return ret
             
             can_use_share_flag = RcloneTool2.can_use_share(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), ret['remote_path'])
-            if can_use_share_flag:
+            if not can_use_share_flag:
                 ret['ret'] = 'cannot_access'
                 return ret
             
