@@ -17,22 +17,38 @@ import requests
 from flask import Blueprint, request, Response, send_file, render_template, redirect, jsonify
 
 # sjva 공용
-from framework import app, db, scheduler, path_app_root
+from framework import app, db, scheduler, path_app_root, path_data
 from framework.job import Job
 from framework.util import Util
 from framework.common.share import RcloneTool
-from system.model import ModelSetting as SystemModelSetting
+from framework.common.plugin import LogicModuleBase
 
 # 패키지
-from .plugin import logger, package_name, SERVER_URL
-from .logic import Logic
-from .model import ModelSetting
-
+from .plugin import P, logger, package_name,  ModelSetting
 #########################################################
  
-class LogicBase(object):
-    @staticmethod
-    def process_ajax(sub, req):
+class LogicBase(LogicModuleBase):
+    db_default = { 
+        'db_version' : '5',
+        'rclone_path' : os.path.join(path_app_root, 'bin', platform.system(), 'rclone'),
+        'rclone_config_path' : os.path.join(path_data, 'db', 'rclone.conf'),
+        'defalut_remote_path' : '',
+    }
+
+
+    def __init__(self, P):
+        super(LogicBase, self).__init__(P, 'setting')
+        self.name = 'base'
+
+    def process_menu(self, sub, req):
+        arg = P.ModelSetting.to_dict()
+        arg['sub'] = self.name
+        if sub == 'setting':
+            return render_template('{package_name}_{module_name}_{sub}.html'.format(package_name=P.package_name, module_name=self.name, sub=sub), arg=arg)
+        return render_template('sample.html', title='%s - %s' % (P.package_name, sub))
+
+
+    def process_ajax(self, sub, req):
         try:
             if sub == 'rclone_lsjson':
                 remote_path = req.form['remote_path']

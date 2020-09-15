@@ -13,61 +13,82 @@ from flask_login import login_user, logout_user, current_user, login_required
 from framework.logger import get_logger
 from framework import app, db, scheduler, path_data, socketio, check_api
 from framework.util import Util
-from system.model import ModelSetting as SystemModelSetting
-
-# 패키지
-package_name = __name__.split('.')[0]
-logger = get_logger(package_name)
-SERVER_URL = 'https://sjva-server.soju6jan.com'
-
-from .model import ModelSetting
-from .logic import Logic
-from .logic_base import LogicBase
-from .logic_av_sub import LogicAVSub
-from .logic_user import LogicUser
-
+from framework.common.plugin import get_model_setting, Logic, default_route
 #########################################################
 
-blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
-
-
-menu = {
-    'main' : [package_name, '구글 드라이브 공유'], 
-    'sub' : [
-        ['base', '기본'], ['user', '유저공유'], ['av_sub', 'AV 자막영상'], ['log', '로그']
-    ],
-    'category' : 'service',
-    'sub2' : {
-        'base' : [
-            ['setting', '기본 설정'], #['list', '목록']
+class P(object):
+    package_name = __name__.split('.')[0]
+    logger = get_logger(package_name)
+    blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
+    menu = {
+        'main' : [package_name, '구글 드라이브 공유'], 
+        'sub' : [
+            ['base', '기본'], ['user', '유저공유'], ['log', '로그']
         ],
-        'av_sub' : [
-            ['setting', '설정'], ['list', '목록'], ['detail', '세부정보'], ['transfer', '전송'], ['plex', 'PLEX에서 찾기']
-        ],
-        'user' : [
-            ['setting', '설정'], ['upload', '업로드'], #['download_list', '다운로드 목록'],
-        ]
-    },
-}
+        'category' : 'service',
+        'sub2' : {
+            'base' : [
+                ['setting', '기본 설정'], #['list', '목록']
+            ],
+            #'av_sub' : [
+            #    ['setting', '설정'], ['list', '목록'], ['detail', '세부정보'], ['transfer', '전송'], ['plex', 'PLEX에서 찾기']
+            #],
+            'user' : [
+                ['setting', '설정'], ['upload', '업로드'], ['list', '작업현황'] #['download_list', '다운로드 목록'],
+            ]
+        },
+    }
+    plugin_info = {
+        'version' : '0.2.0.0',
+        'name' : 'gd_share_client',
+        'category_name' : 'service',
+        'developer' : 'soju6jan',
+        'description' : '구글 드라이브 공유 클라이언트',
+        'home' : 'https://github.com/soju6jan/gd_share_client',
+        'more' : '',
+        'policy_level' : 3,
+    }
+    ModelSetting = get_model_setting(package_name, logger)
+    logic = None
+    module_list = None
+    home_module = 'user'
+    SERVER_URL = 'https://sjva-dev.soju6jan.com'
+    plugin_small = None
+
+logger = P.logger
+package_name = P.package_name
+ModelSetting = P.ModelSetting
 
 
-plugin_info = {
-    'version' : '0.1.0.0',
-    'name' : 'gd_share_client',
-    'category_name' : 'service',
-    'developer' : 'soju6jan',
-    'description' : '구글 드라이브 공유 클라이언트',
-    'home' : 'https://github.com/soju6jan/gd_share_client',
-    'more' : '',
-    'policy_level' : 3,
-}
+def initialize():
+    try:
+        app.config['SQLALCHEMY_BINDS'][P.package_name] = 'sqlite:///%s' % (os.path.join(path_data, 'db', '{package_name}.db'.format(package_name=P.package_name)))
+        from framework.util import Util
+        Util.save_from_dict_to_json(P.plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))
+        from .logic_base import LogicBase
+        from .logic_user import LogicUser
+        P.module_list = [LogicBase(P), LogicUser(P)]
+        P.logic = Logic(P)
+        default_route(P)
 
-plugin_small = True if app.config['config']['level'] < 4 else False
+        plugin_small = True if app.config['config']['level'] < 4 else False
+        if plugin_small:
+            del(P.menu['sub'][2])
+            del(P.menu['sub2']['user'][1])
+    except Exception as e: 
+        P.logger.error('Exception:%s', e)
+        P.logger.error(traceback.format_exc())
+
+initialize()
+
+"""
+from .model import ModelSetting
+from .logic import Logic
+from .logic_av_sub import LogicAVSub
+
+
 
 def plugin_load():
-    if plugin_small:
-        del(menu['sub'][2])
-        del(menu['sub2']['user'][1])
     Logic.plugin_load()
 
 def plugin_unload():
@@ -80,10 +101,7 @@ def process_telegram_data(data):
 #########################################################
 # WEB Menu   
 #########################################################
-@blueprint.route('/')
-def home():
-    #return redirect('/%s/download/list' % package_name)
-    return redirect('/%s/base' % package_name)
+
 
 @blueprint.route('/<sub>', methods=['GET', 'POST'])
 @login_required
@@ -212,3 +230,4 @@ def api(sub, sub2):
         logger.error('Exception:%s', e)
         logger.error(traceback.format_exc())
 
+"""
