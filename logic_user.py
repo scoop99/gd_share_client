@@ -251,7 +251,7 @@ class LogicUser(LogicModuleBase):
                 board_content = board_content[board_content.find('\n'):]
 
             def func():
-                ret = RcloneTool2.do_user_upload(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), my_remote_path, folder_name, '1HgFbtNtWOUZPaG9VaW032VgF64aEgIiF', board_type, category_type)
+                ret = RcloneTool2.do_user_upload(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), my_remote_path, folder_name, '1HgFbtNtWOUZPaG9VaW032VgF64aEgIiF', board_type, category_type, is_move=(action=='move'))
 
                 if ret['completed']:
                     if board_type != 'share_private' and ret['folder_id'] != '':
