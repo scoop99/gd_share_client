@@ -173,8 +173,6 @@ class LogicUser(LogicModuleBase):
                     ret['ret'] = 'success'
                     ret['data'] = my_remote_path
                 return jsonify(ret)
-
-
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
