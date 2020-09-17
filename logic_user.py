@@ -294,6 +294,13 @@ class LogicUser(LogicModuleBase):
 
     def add_copy(self, folder_id, folder_name, board_type, category_type, size, count, remote_path=None):
         try:
+
+            logger.debug('111111111111111111111111111111111111')
+            logger.debug(remote_path)
+
+
+
+
             ret = {'ret':'fail', 'remote_path':remote_path, 'server_response':None}
             if ret['remote_path'] is None:
                 ret['remote_path'] = self.get_my_copy_path(board_type, category_type)
@@ -323,6 +330,9 @@ class LogicUser(LogicModuleBase):
             item.save()
 
             data = item.as_dict()
+            if board_type in ['bot_downloader_ktv', 'bot_downloader_movie', 'bot_downloader_av']:
+                data['target_name'] = ''
+
             data['ddns'] = SystemModelSetting.get('ddns')
             data['sjva_me_id'] = SystemModelSetting.get('sjva_me_user_id')
             url = P.SERVER_URL + '/gd_share_server/noapi/user/request'
