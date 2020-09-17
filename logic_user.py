@@ -68,6 +68,7 @@ category_list = [
 
 
 class LogicUser(LogicModuleBase):
+    instance = None
     db_default = { 
         'user_copy_dest_list' : u'default = \nshare_movie,국내 = \nshare_movie,외국 = \nshare_ktv,드라마 = \nshare_ktv,예능 = \nshare_ktv,교양 = \nshare_ftv = \nshare_etc = ',
         'user_plex_match_rule': '',
@@ -76,7 +77,7 @@ class LogicUser(LogicModuleBase):
     def __init__(self, P):
         super(LogicUser, self).__init__(P, 'list')
         self.name = 'user'
-
+        LogicUser.instance = self
          
 
 
@@ -291,10 +292,11 @@ class LogicUser(LogicModuleBase):
             logger.error(traceback.format_exc())
 
 
-    def add_copy(self, folder_id, folder_name, board_type, category_type, size, count):
+    def add_copy(self, folder_id, folder_name, board_type, category_type, size, count, remote_path=None):
         try:
-            ret = {'ret':'fail', 'remote_path':None, 'server_response':None}
-            ret['remote_path'] = self.get_my_copy_path(board_type, category_type)
+            ret = {'ret':'fail', 'remote_path':remote_path, 'server_response':None}
+            if ret['remote_path'] is None:
+                ret['remote_path'] = self.get_my_copy_path(board_type, category_type)
             if ret['remote_path'] is None:
                 return ret
 
@@ -308,8 +310,6 @@ class LogicUser(LogicModuleBase):
             if not can_use_share_flag:
                 ret['ret'] = 'cannot_access'
                 return ret
-            
-            
             
             item = ModelShareItem()
             item.copy_type = 'share'

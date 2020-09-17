@@ -12,7 +12,10 @@
           </select>
           <select id="option" name="option" class="form-control form-control-sm">
             <option value="all">전체</option>
-            <option value="completed">완료</option>
+            <option value="ready">준비</option>
+            <option value="request">서버 복사 요청</option>
+            <option value="clone">서버 복사 완료</option>
+            <option value="completed">내 리모트 이동 완료</option>
           </select>
         </span>
         <span class="col-md-8">
@@ -63,28 +66,26 @@ function make_list(data) {
     tmp = data[i].status;
     str += m_col(1, tmp);
     
-    tmp = '<br>target_name : ' + data[i].target_name;
-    tmp += '<br>copy_type : ' + data[i].copy_type;
-    tmp += '<br>call_from : ' + data[i].call_from;
-    str += m_col(2, tmp);
+    tmp = '이름 :' + data[i].target_name;
+    tmp += '<br>타입 : ' + data[i].board_type;
+    tmp += '<br>서브타입 : ' + data[i].category_type;
+    tmp2 = m_button('global_json_btn', 'JSON', [{'key':'id', 'value':data[i].id}]);
+    tmp2 += m_button('global_remove_btn', '삭제', [{'key':'id', 'value':data[i].id}]);
+    tmp += '<br>' + m_button_group(tmp2)
 
-    tmp += '<br>board_type : ' + data[i].board_type;
-    tmp += '<br>category_type : ' + data[i].category_type;
-    
-    tmp += '<br>size : ' + data[i].size;
-    tmp += '<br>count : ' + data[i].count;
-    str += m_col(5, tmp);
+    str += m_col(4, tmp);
+
+
+    tmp = '크기 : ' + data[i].size;
+    tmp += '<br>파일 : ' + data[i].count;
+    str += m_col(2, tmp);
 
     tmp = 'Remote : ' + data[i].remote_path;
     tmp += '<br>' + data[i].created_time + '(추가)';
     if (data[i].request_time != null) tmp += '<br>' + data[i].request_time + '(서버 복사 요청)';
     if (data[i].clone_completed_time != null) tmp += '<br>' + data[i].clone_completed_time + '(서버 복사 완료)';
     if (data[i].completed_time != null) tmp += '<br>' + data[i].completed_time + '(내 리모트 이동 완료)';
-
-    tmp2 = m_button('global_json_btn', 'JSON', [{'key':'id', 'value':data[i].id}]);
-    tmp2 += m_button('global_remove_btn', '삭제', [{'key':'id', 'value':data[i].id}]);
-    tmp += m_button_group(tmp2)
-    str += m_col(3, tmp)
+    str += m_col(4, tmp)
     str += m_row_end();
     if (i != data.length -1) str += m_hr();
   }
