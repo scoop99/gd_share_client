@@ -18,7 +18,7 @@ from flask import Blueprint, request, Response, send_file, render_template, redi
 from sqlalchemy import or_, and_, func, not_, desc
 
 # sjva 공용
-from framework import app, db, scheduler, path_app_root, socketio
+from framework import app, db, scheduler, path_app_root, socketio, version
 from framework.job import Job
 from framework.util import Util
 from framework.common.share import RcloneTool, RcloneTool2
@@ -127,10 +127,18 @@ class LogicUser(LogicModuleBase):
                 size = int(req.form['size'])
                 count = int(req.form['count'])
                 ddns = req.form['ddns']
+                need_version = req.form['version']
                 if ddns != SystemModelSetting.get('ddns'):
-                    ret = {'ret':'wrong_ddns'}
-                else:
-                    ret = self.add_copy(folder_id, folder_name, board_type, category_type, size, count)
+                    return {'ret':'wrong_ddns'}
+                
+                tmp1 = need_version.split('.')
+                tmp2 = version.split('.')
+                need_version = int(tmp1[2]) * 100 + int(tmp1[3])
+                current_version = int(tmp2[2]) * 100 + int(tmp2[3])
+                if need_version > current_version:
+                    return {'ret':'need_update', 'current_version':version, 'need_version':need_version}
+                ret = self.add_copy(folder_id, folder_name, board_type, category_type, size, count)
+                ret['current_version'] = version
                 return jsonify(ret)
             elif sub == 'torrent_copy':
                 folder_id = req.form['folder_id']
@@ -298,10 +306,8 @@ class LogicUser(LogicModuleBase):
             logger.debug('111111111111111111111111111111111111')
             logger.debug(remote_path)
 
-
-
-
             ret = {'ret':'fail', 'remote_path':remote_path, 'server_response':None}
+            
             if ret['remote_path'] is None:
                 ret['remote_path'] = self.get_my_copy_path(board_type, category_type)
             if ret['remote_path'] is None:
@@ -317,6 +323,8 @@ class LogicUser(LogicModuleBase):
             if not can_use_share_flag:
                 ret['ret'] = 'cannot_access'
                 return ret
+
+
             
             item = ModelShareItem()
             item.copy_type = 'share'
