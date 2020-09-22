@@ -165,7 +165,7 @@ $("body").on('click', '#rclone_size_btn', function(e) {
       str = '';
       try {
         str += '파일 : ' + data.count + '개 / ' + humanFileSize(data.bytes);
-        if (data.count >2000) {
+        if (data.count > 1000) {
           $.notify('<strong>파일 : '+data.count+'개<br>업로드 최대 파일수는 1,000</strong>', {type: 'warning'});
         } else {
           document.getElementById("size").value = '' + data.bytes;
