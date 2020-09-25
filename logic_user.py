@@ -201,7 +201,7 @@ class LogicUser(LogicModuleBase):
                 client_db_id = req.form['client_db_id']
                 ret = req.form['ret']
                 if about == 'request':
-                    item = ModelShareItem.get_by_id(int(db_id))
+                    item = ModelShareItem.get_by_id(int(client_db_id))
                     item.status = req.form['ret']
                     item.save()
                 elif about == 'relay_completed':
