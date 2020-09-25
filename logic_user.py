@@ -334,7 +334,10 @@ class LogicUser(LogicModuleBase):
                 return ret
             
             if board_type in ['bot_downloader_av', 'torrent_av']:
-                pass    
+                can_use_relay = RcloneTool2.can_use_relay(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), ModelSetting.get('worker_remote'))
+                if not can_use_relay:
+                    ret['ret'] = 'wrong_setting'
+                    return ret
 
             item = ModelShareItem()
             item.copy_type = 'share'
@@ -348,8 +351,8 @@ class LogicUser(LogicModuleBase):
             item.save()
 
             data = item.as_dict()
-            if board_type in ['bot_downloader_ktv', 'bot_downloader_movie', 'bot_downloader_av']:
-                data['target_name'] = ''
+            #if board_type in ['bot_downloader_ktv', 'bot_downloader_movie', 'bot_downloader_av']:
+            #    data['target_name'] = ''
 
             data['ddns'] = SystemModelSetting.get('ddns')
             data['sjva_me_id'] = SystemModelSetting.get('sjva_me_user_id')
