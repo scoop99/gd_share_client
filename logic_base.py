@@ -33,6 +33,7 @@ class LogicBase(LogicModuleBase):
         'rclone_path' : os.path.join(path_app_root, 'bin', platform.system(), 'rclone'),
         'rclone_config_path' : os.path.join(path_data, 'db', 'rclone.conf'),
         'defalut_remote_path' : '',
+        'worker_remote' : '',
     }
 
 

@@ -192,8 +192,21 @@ class LogicUser(LogicModuleBase):
             if sub == 'copy_completed':
                 clone_folder_id = req.form['clone_folder_id']
                 client_db_id = req.form['client_db_id']
-
-                self.do_download(client_db_id, clone_folder_id)
+                recopy = (req.form['recopy'] == 'True')
+                self.do_download(client_db_id, clone_folder_id, recopy)
+                ret = {'ret':'success'}
+                return jsonify(ret)
+            elif sub == 'callback':
+                about = req.form['about']
+                client_db_id = req.form['client_db_id']
+                ret = req.form['ret']
+                if about == 'request':
+                    item = ModelShareItem.get_by_id(int(db_id))
+                    item.status = req.form['ret']
+                    item.save()
+                elif about == 'relay_completed':
+                    if ret == 'success':
+                        self.do_relay_completed(client_db_id, req.form['source_remote_path'], req.form['original_remote_path'])
                 ret = {'ret':'success'}
                 return jsonify(ret)
         except Exception as e: 
@@ -302,10 +315,6 @@ class LogicUser(LogicModuleBase):
 
     def add_copy(self, folder_id, folder_name, board_type, category_type, size, count, remote_path=None):
         try:
-
-            logger.debug('111111111111111111111111111111111111')
-            logger.debug(remote_path)
-
             ret = {'ret':'fail', 'remote_path':remote_path, 'server_response':None}
             
             if ret['remote_path'] is None:
@@ -323,9 +332,10 @@ class LogicUser(LogicModuleBase):
             if not can_use_share_flag:
                 ret['ret'] = 'cannot_access'
                 return ret
-
-
             
+            if board_type in ['bot_downloader_av', 'torrent_av']:
+                pass    
+
             item = ModelShareItem()
             item.copy_type = 'share'
             item.source_id = folder_id
@@ -362,8 +372,7 @@ class LogicUser(LogicModuleBase):
         return ret
 
 
-
-    def do_download(self, db_id, clone_folder_id):
+    def do_download(self, db_id, clone_folder_id, recopy):
         def func():
             try:
                 item = ModelShareItem.get_by_id(int(db_id))
@@ -374,15 +383,35 @@ class LogicUser(LogicModuleBase):
                 item.clone_completed_time = datetime.now()
                 item.clone_folderid = clone_folder_id
                 #item.save()
-
-                ret = RcloneTool2.do_user_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, item.remote_path)
-
+                remote_path = item.remote_path
+                if recopy:
+                    #remote_path = item.remote_path + '/tmp_' + item.source_id
+                    remote_path = ModelSetting.get('worker_remote').rstrip('/') + ('/%s' % item.id)
+                ret = RcloneTool2.do_user_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path)
                 if ret:
-                    item.status = 'completed'
-                    item.completed_time = datetime.now()
+                    if recopy:
+                        sourceid = RcloneTool2.getid(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), remote_path)
+                        url = P.SERVER_URL + '/gd_share_server/noapi/user/request_relay'
+                        data = {}
+                        data['id'] = db_id
+                        data['ddns'] = SystemModelSetting.get('ddns')
+                        data['sjva_me_id'] = SystemModelSetting.get('sjva_me_user_id')
+                        data['sourceid'] = sourceid
+                        data['targetid'] = item.source_id
+                        data['source_remote_path'] = remote_path
+                        data['original_remote_path'] = item.remote_path
+                        res = requests.post(url, data={'data':json.dumps(data)}).json()
+                        if res['ret'] == 'success':
+                            item.status = 'request_relay'
+                        else:
+                            item.status = 'request_relay_fail'
+                    else:
+                        item.status = 'completed'
+                        item.completed_time = datetime.now()
             except Exception as e: 
                 logger.error('Exception:%s', e)
                 logger.error(traceback.format_exc())
+                item.status = 'download_exception'
             finally:
                 if item is not None:
                     item.save()
@@ -390,7 +419,30 @@ class LogicUser(LogicModuleBase):
         thread.setDaemon(True)
         thread.start()
 
-
+    def do_relay_completed(self, db_id, source_remote_path, original_remote_path):
+        logger.debug('do_relay_completed db_id : %s, source_remote_path : %s, original_remote_path : %s', db_id, source_remote_path, original_remote_path)
+        def func():
+            try:
+                item = ModelShareItem.get_by_id(int(db_id))
+                if item is None:
+                    logger.error('CRITICAL ERROR do_relay_completed : %s', db_id)
+                    return
+                ret = RcloneTool2.do_relay_completed(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), source_remote_path, original_remote_path)
+                if ret:
+                    item.status = 'relay_completed'
+                else:
+                    item.status = 'relay_completed_fail'
+                item.completed_time = datetime.now()
+            except Exception as e: 
+                logger.error('Exception:%s', e)
+                logger.error(traceback.format_exc())
+                item.status = 'download_exception'
+            finally:
+                if item is not None:
+                    item.save()
+        thread = threading.Thread(target=func, args=())
+        thread.setDaemon(True)
+        thread.start()
 
     @staticmethod
     def site_append(data):
@@ -435,7 +487,7 @@ class LogicUser(LogicModuleBase):
 
 
     
-
+    
     @staticmethod
     def torrent_copy(folder_id, board_type, category_type, my_remote_path=None, callback=None, callback_id=None, show_modal=False):
         try:
