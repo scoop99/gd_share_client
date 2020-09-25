@@ -356,6 +356,7 @@ class LogicUser(LogicModuleBase):
 
             data['ddns'] = SystemModelSetting.get('ddns')
             data['sjva_me_id'] = SystemModelSetting.get('sjva_me_user_id')
+            data['version'] = version
             url = P.SERVER_URL + '/gd_share_server/noapi/user/request'
             res = requests.post(url, data={'data':json.dumps(data)})
 
