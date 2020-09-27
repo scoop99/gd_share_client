@@ -16,7 +16,7 @@
     {{ macros.m_tab_content_start('normal', true) }}
       {{ macros.setting_input_text('rclone_path', 'Binary Path',value=arg['rclone_path']) }}
       {{ macros.setting_input_text_and_buttons('rclone_config_path', 'Config Path', [['rclone_conf_edit_btn', '편집']], value=arg['rclone_config_path'], desc=['root_folder_id 값이 root가 아닌 경우에는 설정값을 삭제한 후 전체 경로로 사용하길 권장합니다.']) }}
-      {{ macros.setting_input_text('worker_remote', 'worker와 공유한 리모트 경로', value=arg['worker_remote'], desc=['worker@sjva.me 를 뷰어로 참가시킨 구드내 폴더의 리모트 경로', '현재는 SJVA 봇 AV 플러그인과 웹 torrent_av 게시판을 이용하려면 내드나 공드의 일정 공간을 워커와 공유해합니다.']) }}
+      {{ macros.setting_input_text_and_buttons('worker_remote', 'worker가 접근 가능한 리모트 경로', [['worker_test_btn', '릴레이 공유 테스트']], value=arg['worker_remote'], desc=['릴레이 공유시에만 사용합니다.', '모든 사용자에게 공개로 설정한 구드내 폴더의 리모트 경로']) }}
       {{ macros.setting_input_text_and_buttons('defalut_remote_path', '기본 리모트 경로', [['rclone_lsjson_btn', '폴더내용 보기']], value=arg['defalut_remote_path'], desc=['전송 화면에 기본적으로 들어갈 값.']) }}
       {{ macros.m_hr() }}
       {{ macros.setting_button([['groups_go_btn', '구글 그룹스 Go']]) }}
@@ -56,6 +56,25 @@ var sub = "{{arg['sub'] }}";
 $(document).ready(function(){
 });
 
+
+$("body").on('click', '#worker_test_btn', function(e) {
+  e.preventDefault();
+  worker_remote = document.getElementById('worker_remote').value;
+  $.ajax({
+    url: '/' + package_name + '/ajax/'+sub+'/worker_remote_test',
+    type: "POST", 
+    cache: false,
+    data: {worker_remote:worker_remote},
+    dataType: "json",
+    success: function (data) {
+      if (data.ret == 'success') {
+        $.notify('<strong>Relay 공유가 가능합니다.<strong>', {type: 'success'});
+      }else {
+        $.notify('<strong>설정이 잘못 되어 있습니다.</strong>', {type: 'warning'});
+      }
+    }
+  });
+});
 
 $("body").on('click', '#rclone_lsjson_btn', function(e) {
   e.preventDefault();

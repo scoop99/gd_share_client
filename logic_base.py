@@ -20,7 +20,7 @@ from flask import Blueprint, request, Response, send_file, render_template, redi
 from framework import app, db, scheduler, path_app_root, path_data
 from framework.job import Job
 from framework.util import Util
-from framework.common.share import RcloneTool
+from framework.common.share import RcloneTool, RcloneTool2
 from framework.common.plugin import LogicModuleBase
 
 # 패키지
@@ -74,6 +74,13 @@ class LogicBase(LogicModuleBase):
                 with open(rclone_config_path, 'w') as f: 
                     f.write(data)
                 return jsonify(True)
+            elif sub == 'worker_remote_test':
+                worker_remote = req.form['worker_remote']
+                can_use_relay = RcloneTool2.can_use_relay(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), worker_remote)
+                ret = {'ret' : 'success'}
+                if not can_use_relay:
+                    ret['ret'] = 'wrong_setting'
+                return jsonify(ret)
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())

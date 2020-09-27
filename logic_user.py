@@ -112,6 +112,7 @@ class LogicUser(LogicModuleBase):
                 return jsonify(ModelShareItem.web_list(req))
             elif sub == 'db_remove':
                 return jsonify(ModelShareItem.delete_by_id(req.form['id']))
+           
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
