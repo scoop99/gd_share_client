@@ -396,6 +396,17 @@ class LogicUser(LogicModuleBase):
                 if ret:
                     if recopy:
                         sourceid = RcloneTool2.getid(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), remote_path)
+                        confirm_size = False
+                        for i in range(10):
+                            tmp = RcloneTool2.size(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), remote_path)
+                            if tmp is not None and tmp['bytes'] == item.size:
+                                confirm_size = True
+                                break
+                            time.sleep(20)
+                        #if confirm_size == False:
+                        #    item.status = 'request_relay_size_diff'
+                        #    self.do_relay_completed(db_id, remote_path, item.remote_path)
+                        #    return
                         url = P.SERVER_URL + '/gd_share_server/noapi/user/request_relay'
                         data = {}
                         data['id'] = db_id
