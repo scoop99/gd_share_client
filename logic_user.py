@@ -58,6 +58,7 @@ category_list = [
         [u'영상', 'c7sXC6+8vX7bnMeMS4X6pua9dCMoscokm3Zp2OHA4Cfj72/9Tk0/MVpPxp8N4LsRX2DLE7Q5L5VL0kE+kkpG+w=='],
         [u'음악', 'GN0gqbjMc+UjSDYu9IdJGLrlk7Oib8BM+eAJNLpDlmh9bFpO24TCB8Z6Ory5z2pBmMYMNv1YWxdmNYtJz7GIxA=='],
         [u'SW', 'lDbIydMTTDHbGraHDU7QLQeMPFe/XVuw23oa3heuxXPx8fnhSNeBGJeYXfvp3/uQsWa6/KBm0BbLrJlHqzs0vQ=='],
+        [u'리딩', ''],
         [u'기타', '8EwvmvMsldeg80cxZvAhr7tZEB4ASlBWo6HeE5iZ4Rph0ymxd/vlXxiifbR7n19YTUaspxlJEAyCuEq5cfPJWg=='],
     ]},
     { 'type' : 'share_private', 'name' : u'등록안함', 'list' : [
