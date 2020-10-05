@@ -5,23 +5,37 @@
   <form id="form_search" class="form-inline" style="text-align:left">
     <div class="container-fluid">
       <div class="row show-grid">
-        <span class="col-md-4">
+        <span class="col-md-6">
+          <select id="option1" name="option1" class="form-control form-control-sm">
+            <option value="all">전체</option>
+            <option value="bot_downloader_ktv">bot_downloader_ktv</option>
+            <option value="bot_downloader_movie">bot_downloader_movie</option>
+            <option value="bot_downloader_av">bot_downloader_av</option>
+            <option value="share_ktv">share_ktv</option>
+            <option value="share_ftv">share_ftv</option>
+            <option value="share_movie">share_movie</option>
+            <option value="share_etc">share_etc</option>
+            <option value="torrent_ktv">torrent_ktv</option>
+            <option value="torrent_movie">torrent_movie</option>
+            <option value="torrent_av">torrent_av</option>
+          </select>
+          <select id="option2" name="option2" class="form-control form-control-sm">
+            <option value="all">전체</option>
+            <option value="ready">ready</option>
+            <option value="request">request</option>
+            <option value="completed">completed</option>
+            <option value="relay_completed">relay_completed</option>
+            <option value="fail">fail</option>
+          </select>
           <select id="order" name="order" class="form-control form-control-sm">
             <option value="desc">최근순</option>
             <option value="asc">오래된순</option>
           </select>
-          <select id="option" name="option" class="form-control form-control-sm">
-            <option value="all">전체</option>
-            <option value="ready">준비</option>
-            <option value="request">서버 복사 요청</option>
-            <option value="clone">서버 복사 완료</option>
-            <option value="completed">내 리모트 이동 완료</option>
-          </select>
         </span>
-        <span class="col-md-8">
+        <span class="col-md-6">
           <input id="search_word" name="search_word" class="form-control form-control-sm w-75" type="text" placeholder="" aria-label="Search">
           <button id="search" class="btn btn-sm btn-outline-success">검색</button>
-          <button id="global_reset_btn" class="btn btn-sm btn-outline-success">리셋</button>
+          <button id="reset_btn" class="btn btn-sm btn-outline-success">리셋</button>
         </span>
       </div>
     </div>
@@ -41,9 +55,19 @@
 var package_name = "{{arg['package_name']}}";
 var sub = "{{arg['sub']}}";
 var current_data = null;
+var user_last_list_option = "{{arg['user_last_list_option']}}";
 
 $(document).ready(function(){
-  global_sub_request_search('1');
+  tmp = user_last_list_option.split('|');
+  if (tmp.length == 5) {
+    document.getElementById("option1").value = tmp[0];
+    document.getElementById("option2").value = tmp[1];
+    document.getElementById("order").value = tmp[2];
+    document.getElementById("search_word").value = tmp[3];
+    global_sub_request_search(tmp[4]);
+  } else {
+    global_sub_request_search('1');
+  }
 });
 
 $("#search").click(function(e) {
@@ -59,38 +83,55 @@ $("body").on('click', '#page', function(e){
 function make_list(data) {
   str = '';
   for (i in data) {
-    console.log(data[i])
     str += m_row_start();
     str += m_col(1, data[i].id);
     //tmp = (data[i].status == 'completed') ? '완료' : '미완료';
-    tmp = data[i].status;
-    str += m_col(1, tmp);
-    
-    tmp = '이름 :' + data[i].target_name;
-    tmp += '<br>타입 : ' + data[i].board_type;
-    tmp += '<br>서브타입 : ' + data[i].category_type;
-    tmp2 = m_button('global_json_btn', 'JSON', [{'key':'id', 'value':data[i].id}]);
-    tmp2 += m_button('global_remove_btn', '삭제', [{'key':'id', 'value':data[i].id}]);
-    tmp += '<br>' + m_button_group(tmp2)
+    tmp = '상태 : ' + data[i].status;
+    tmp += '<br>크기 : ' + humanFileSize(data[i].size);
+    tmp += '<br>파일 : ' + data[i].count;
+    str += m_col(3, tmp);
 
+    tmp = '타입 : ' + data[i].board_type;
+    tmp += '<br>서브타입 : ' + data[i].category_type;
+    tmp += '<br>이름 : ' + data[i].target_name;
+    tmp += '<br>리모트 : ' + data[i].remote_path;
     str += m_col(4, tmp);
 
-
-    tmp = '크기 : ' + data[i].size;
-    tmp += '<br>파일 : ' + data[i].count;
-    str += m_col(2, tmp);
-
-    tmp = 'Remote : ' + data[i].remote_path;
-    tmp += '<br>' + data[i].created_time + '(추가)';
+    
+    tmp = data[i].created_time + '(추가)';
     if (data[i].request_time != null) tmp += '<br>' + data[i].request_time + '(서버 복사 요청)';
     if (data[i].clone_completed_time != null) tmp += '<br>' + data[i].clone_completed_time + '(서버 복사 완료)';
     if (data[i].completed_time != null) tmp += '<br>' + data[i].completed_time + '(내 리모트 이동 완료)';
+    tmp2 = m_button('global_json_btn', 'JSON', [{'key':'id', 'value':data[i].id}]);
+    tmp2 += m_button('global_remove_btn', '삭제', [{'key':'id', 'value':data[i].id}]);
+    tmp += '<br>' + m_button_group(tmp2)
     str += m_col(4, tmp)
     str += m_row_end();
     if (i != data.length -1) str += m_hr();
   }
   document.getElementById("list_div").innerHTML = str;
 }
+
+
+$("body").on('click', '#reset_btn', function(e){
+  e.preventDefault();
+  document.getElementById("order").value = 'desc';
+  document.getElementById("option1").value = 'all';
+  document.getElementById("option2").value = 'all';
+  document.getElementById("search_word").value = '';
+  global_sub_request_search('1')
+});
+
+
+$("body").on('change', '#option1', function(e){
+  global_sub_request_search('1');
+});
+$("body").on('change', '#option2', function(e){
+  global_sub_request_search('1');
+});
+$("body").on('change', '#order', function(e){
+  global_sub_request_search('1');
+});
 
 
 </script>    

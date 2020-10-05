@@ -29,7 +29,6 @@ from .plugin import P, logger, package_name, ModelSetting
 
 #########################################################
 
-
 category_list = [
     { 'type' : 'share_movie', 'name' : u'영화', 'list' : [
         [u'국내', '+3GSRdSQqijI/FUenjzYeuLwvpTQSWsP21UbPT1LCi7yxz3n3M6KpmkfIAkU4W3uRZFMwMET0R5J2kkpq8mk6Q=='], 
@@ -73,6 +72,7 @@ class LogicUser(LogicModuleBase):
     db_default = { 
         'user_copy_dest_list' : u'default = \nshare_movie,국내 = \nshare_movie,외국 = \nshare_ktv,드라마 = \nshare_ktv,예능 = \nshare_ktv,교양 = \nshare_ftv = \nshare_etc = ',
         'user_plex_match_rule': '',
+        'user_last_list_option' : '',
     }
 
     def __init__(self, P):
@@ -80,7 +80,6 @@ class LogicUser(LogicModuleBase):
         self.name = 'user'
         LogicUser.instance = self
          
-
 
     def process_menu(self, sub, req):
         arg = P.ModelSetting.to_dict()
@@ -104,7 +103,7 @@ class LogicUser(LogicModuleBase):
                 return jsonify(ret)
             elif sub == 'search_plex':
                 keyword = req.form['keyword']
-                ret = LogicUser.search_plex(keyword)
+                ret = self.search_plex(keyword)
                 return jsonify(ret)
             elif sub == 'do_action':
                 ret = self.do_action(req)
@@ -142,25 +141,11 @@ class LogicUser(LogicModuleBase):
                 ret = self.add_copy(folder_id, folder_name, board_type, category_type, size, count)
                 ret['current_version'] = version
                 return jsonify(ret)
-            elif sub == 'torrent_copy':
-                folder_id = req.form['folder_id']
-                board_type = req.form['board_type']
-                category_type = req.form['category_type']
-
-                my_remote_path = LogicUser.torrent_copy(folder_id, board_type, category_type, show_modal=True)
-                ret = {}
-                if my_remote_path is None:
-                    ret['ret'] = 'fail'
-                    ret['data'] = 'remote path is None!!'
-                else:
-                    ret['ret'] = 'success'
-                    ret['data'] = my_remote_path
-                return jsonify(ret)
             elif sub == 'vod_copy':
                 fileid = req.form['fileid']
                 board_type = req.form['board_type']
                 category_type = req.form['category_type']
-                my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
+                my_remote_path = self.get_my_copy_path(board_type, category_type)
                 ret = {}
                 if my_remote_path is None:
                     ret['ret'] = 'fail'
@@ -168,22 +153,9 @@ class LogicUser(LogicModuleBase):
                 else:
                     ret['ret'] = 'success'
                     ret['data'] = my_remote_path
-                    LogicUser.vod_copy(fileid, my_remote_path)
+                    self.vod_copy(fileid, my_remote_path)
                 return jsonify(ret)
-            elif sub == 'copy_with_json':
-                fileid = req.form['fileid']
-                board_type = req.form['board_type']
-                category_type = req.form['category_type']
-                my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
-                my_remote_path = LogicUser.copy_with_json(fileid, my_remote_path, show_modal=True)
-                ret = {}
-                if my_remote_path is None:
-                    ret['ret'] = 'fail'
-                    ret['data'] = 'remote path is None!!'
-                else:
-                    ret['ret'] = 'success'
-                    ret['data'] = my_remote_path
-                return jsonify(ret)
+
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
@@ -216,103 +188,6 @@ class LogicUser(LogicModuleBase):
             logger.error(traceback.format_exc())
 
     #################################################################
-
-    def daum_info(self, title, board_type):
-        try:
-            if board_type == 'share_movie':
-                from framework.common.daum import MovieSearch
-                match = re.compile(r'\(\d{4}\)').search(title)
-                year = ''
-                if match:
-                    title = title.replace(match.group(0), '').strip()
-                    year = match.group(0).replace('(', '').replace(')', '')
-                data = MovieSearch.search_movie(title, year)
-                data = data[1][0]
-                data['daum_url'] = 'https://movie.daum.net/moviedb/main?movieId=' + data['id']
-            elif board_type == 'share_ktv' or board_type == 'share_ftv':
-                from framework.common.daum import DaumTV
-                match = re.compile(r'\(\d{4}\)').search(title)
-                year = ''
-                if match:
-                    title = title.replace(match.group(0), '').strip()
-                    year = match.group(0).replace('(', '').replace(')', '')
-                data = DaumTV.get_daum_tv_info(title)
-                data['episode_list'] = []
-                data['daum_url'] = 'https://search.daum.net/search?w=tv&q=%s&irk=%s' % (data['title'], data['daum_id'])
-            return data
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-            return ''
-
-
-
-
-
-
-    def do_action(self, req):
-        try:
-            upload_folderid = '1HgFbtNtWOUZPaG9VaW032VgF64aEgIiF'
-            folder_id = req.form['folder_id']
-            my_remote_path = req.form['my_remote_path']
-            
-            # 게시판
-            board_type = req.form['board_type']
-            category_type = req.form['category_type']
-            board_title = req.form['board_title']
-            board_content = req.form['board_content']
-            board_daum_url = req.form['board_daum_url']
-            folder_name = req.form['folder_name'] 
-
-            size = int(req.form['size'])
-            daum_info = req.form['daum_info']
-            action = req.form['action']
-            user_id = SystemModelSetting.get('sjva_me_user_id')
-            if board_content.startswith('ID:'):
-                user_id = board_content.split('\n')[0].split(':')[1].strip()
-                board_content = board_content[board_content.find('\n'):]
-
-            def func():
-                ret = RcloneTool2.do_user_upload(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), my_remote_path, folder_name, '1HgFbtNtWOUZPaG9VaW032VgF64aEgIiF', board_type, category_type, is_move=(action=='move'))
-
-                if ret['completed']:
-                    if board_type != 'share_private' and ret['folder_id'] != '':
-                        msg = u'6. 게시물 등록중...\n'
-                        socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
-                        data = {'board_type' : board_type, 'category_type':category_type, 'board_title':board_title, 'board_content':board_content, 'board_daum_url' : board_daum_url, 'folder_name':folder_name, 'size':ret['size'], 'daum_info':daum_info, 'folder_id':ret['folder_id'], 'user_id':user_id, 'lsjson' : json.dumps(ret['lsjson'])}
-                        LogicUser.site_append(data)
-                    else:
-                        msg = u'업로드한 폴더ID값을 가져올 수 없어서 사이트 등록에 실패하였습니다.\n관리자에게 등록 요청하세요.\n'
-                        socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
-                else:
-                    socketio.emit("command_modal_add_text", u'업로드가 완료되지 않아 게시글이 등록되지 않습니다.\n', namespace='/framework', broadcast=True)
-                    socketio.emit("command_modal_add_text", u'확인 후 다시 시도하세요.\n', namespace='/framework', broadcast=True)
-                socketio.emit("command_modal_add_text", u'\n모두 완료되었습니다.\n', namespace='/framework', broadcast=True)
-            thread = threading.Thread(target=func, args=())
-            thread.setDaemon(True)
-            thread.start()
-            return ''
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-
-
-    def get_my_copy_path(self, board_type, category_type):
-        try:
-            tmp = ModelSetting.get_list('user_copy_dest_list', '\n')
-            remote_list = {}
-            for t in tmp:
-                t2 = t.split('=')
-                if len(t2) == 2 and t2[1].strip() != '':
-                    remote_list[t2[0].strip()] = t2[1].strip()
-            keys = [u'%s,%s' % (board_type, category_type), u'%s' % (board_type), 'default']
-
-            for key in keys:
-                if key in remote_list:
-                    return remote_list[key]
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
 
 
     def add_copy(self, folder_id, folder_name, board_type, category_type, size, count, remote_path=None):
@@ -461,143 +336,8 @@ class LogicUser(LogicModuleBase):
         thread.setDaemon(True)
         thread.start()
 
-    @staticmethod
-    def site_append(data):
-        try:
-            import requests
-            import json
-            response = requests.post("https://sjva.me/sjva/share_append2.php", data={'data':json.dumps(data)})
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
-
-    
-    
-
-
-    
-
-
-
-
-
-    
-    
-    @staticmethod
-    def torrent_copy(folder_id, board_type, category_type, my_remote_path=None, callback=None, callback_id=None, show_modal=False):
-        try:
-            if my_remote_path is None:
-                my_remote_path = LogicUser.get_my_copy_path(board_type, category_type)
-            if my_remote_path is None:
-                return
-            # 시간차이가 있어서 바로 다운로드가 안되는 문제 발생
-            # 폴더id의 내용이 있는지 확인
-            
-            #if my_remote_path.startswith('gc:'):
-            #    try:
-            #        from rclone_expand.logic_gclone import LogicGclone
-            #        tmp = ['gc:{%s}|%s' % (RcloneTool.folderid_decrypt(folder_id), my_remote_path)]
-            #        LogicGclone.queue_append(tmp)
-            #    except Exception as e: 
-            #        logger.error('Exception:%s', e)
-            #        logger.error(traceback.format_exc())
-            #    return 'gclone'
-            #else:
-            def func():
-                for i in range(1, 11):
-                    logger.debug('토렌트 다운로드 시도 : %s %s', i, folder_id)
-                    ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=show_modal, force_remote_name=ModelSetting.get('force_remote_name'))
-                    #logger.debug(ret)
-                    if ret['percent'] == 0:
-                        if show_modal:
-                            msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/10)' % i
-                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
-                        time.sleep(30)
-                    else:
-                        if show_modal:
-                            msg = u'모두 완료되었습니다.'
-                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
-                        if callback is not None:
-                            callback(callback_id)
-                        break
-                    #logger.debug(msg)
-            thread = threading.Thread(target=func, args=())
-            thread.setDaemon(True)
-            thread.start()
-            return 'rclone'
-            #return my_remote_path
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-
-
-    @staticmethod
-    def get_remote_path(filepath):
-        try:
-            rule = ModelSetting.get('user_plex_match_rule')
-            if rule is not None:
-                tmp = rule.split('|')
-                ret = filepath.replace(tmp[1], tmp[0])
-                if filepath[0] != '/':
-                    ret = ret.replace('\\', '/')
-                return ret.replace('//', '/').replace('\\\\', '\\')
-
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-    
-    @staticmethod
-    def search_plex(keyword):
-        import plex
-        try:
-            data = plex.LogicNormal.find_by_filename_part(keyword)
-            ret  = dict()
-            ndirs  = 0
-            nfiles = 0
-            #logger.debug(data)
-            if len(data['list']) > 0:
-                for item in data['list']:
-                    if item['dir'] in ret:
-                        f = ret[item['dir']]['files']
-                        f.append({'filename': item['filename'], 'size_str':item['size_str']})
-                    else:
-                        remote_path = LogicUser.get_remote_path(item['dir'])
-                        ret[item['dir']] = {'remote_path': remote_path, 'files': [{'filename': item['filename'], 'size_str':item['size_str']}]}
-
-                ndirs = len(ret)
-                for k, v in ret.items(): nfiles = nfiles + len(v['files'])
-            logger.debug('search plex: keyword(%s), result(%d dirs, %d files)', keyword, ndirs, nfiles)
-            return ret
-
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-
-
-    @staticmethod
-    def vod_copy(fileid, remote_path):
+    def vod_copy(self, fileid, remote_path):
         try:
             if remote_path is None:
                 return
@@ -619,44 +359,171 @@ class LogicUser(LogicModuleBase):
 
 
 
-
-    @staticmethod
-    def copy_with_json(fileid, my_remote_path, show_modal=False):
+    #################################################################
+    # 업로드 관련
+    #################################################################
+    def daum_info(self, title, board_type):
         try:
-            if my_remote_path is None:
-                return
+            if board_type == 'share_movie':
+                from framework.common.daum import MovieSearch
+                match = re.compile(r'\(\d{4}\)').search(title)
+                year = ''
+                if match:
+                    title = title.replace(match.group(0), '').strip()
+                    year = match.group(0).replace('(', '').replace(')', '')
+                data = MovieSearch.search_movie(title, year)
+                data = data[1][0]
+                data['daum_url'] = 'https://movie.daum.net/moviedb/main?movieId=' + data['id']
+            elif board_type == 'share_ktv' or board_type == 'share_ftv':
+                from framework.common.daum import DaumTV
+                match = re.compile(r'\(\d{4}\)').search(title)
+                year = ''
+                if match:
+                    title = title.replace(match.group(0), '').strip()
+                    year = match.group(0).replace('(', '').replace(')', '')
+                data = DaumTV.get_daum_tv_info(title)
+                data['episode_list'] = []
+                data['daum_url'] = 'https://search.daum.net/search?w=tv&q=%s&irk=%s' % (data['title'], data['daum_id'])
+            return data
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+            return ''
+
+
+    def do_action(self, req):
+        try:
+            upload_folderid = '1HgFbtNtWOUZPaG9VaW032VgF64aEgIiF'
+            folder_id = req.form['folder_id']
+            my_remote_path = req.form['my_remote_path']
             
+            # 게시판
+            board_type = req.form['board_type']
+            category_type = req.form['category_type']
+            board_title = req.form['board_title']
+            board_content = req.form['board_content']
+            board_daum_url = req.form['board_daum_url']
+            folder_name = req.form['folder_name'] 
+
+            size = int(req.form['size'])
+            daum_info = req.form['daum_info']
+            action = req.form['action']
+            user_id = SystemModelSetting.get('sjva_me_user_id')
+            if board_content.startswith('ID:'):
+                user_id = board_content.split('\n')[0].split(':')[1].strip()
+                board_content = board_content[board_content.find('\n'):]
+
             def func():
-                #for i in range(1, 11):
-                    #ret = RcloneTool.do_action(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'),  'download', '', folder_id, '', '', my_remote_path, 'real', folder_id_encrypted=True, listener=None, show_modal=show_modal, force_remote_name=ModelSetting.get('force_remote_name'))
+                ret = RcloneTool2.do_user_upload(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), my_remote_path, folder_name, '1HgFbtNtWOUZPaG9VaW032VgF64aEgIiF', board_type, category_type, is_move=(action=='move'))
 
-                    ret = RcloneTool.copy_with_json(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), fileid, my_remote_path,  show_modal=show_modal)
-
-                    #logger.debug(ret)
-                    """
-                    if ret['percent'] == 0:
-                        if show_modal:
-                            msg = u'아직 토렌트 파일을 받지 못했습니다. 30초 후 다시 시도합니다. (%s/10)' % i
-                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
-                        time.sleep(30)
+                if ret['completed']:
+                    if board_type != 'share_private' and ret['folder_id'] != '':
+                        msg = u'6. 게시물 등록중...\n'
+                        socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                        data = {'board_type' : board_type, 'category_type':category_type, 'board_title':board_title, 'board_content':board_content, 'board_daum_url' : board_daum_url, 'folder_name':folder_name, 'size':ret['size'], 'daum_info':daum_info, 'folder_id':ret['folder_id'], 'user_id':user_id, 'lsjson' : json.dumps(ret['lsjson'])}
+                        self.site_append(data)
                     else:
-                        if show_modal:
-                            msg = u'모두 완료되었습니다.'
-                            socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
-                        if callback is not None:
-                            callback(callback_id)
-                        break
-                    """
-                    #logger.debug(msg)
+                        msg = u'업로드한 폴더ID값을 가져올 수 없어서 사이트 등록에 실패하였습니다.\n관리자에게 등록 요청하세요.\n'
+                        socketio.emit("command_modal_add_text", str(msg), namespace='/framework', broadcast=True)
+                else:
+                    socketio.emit("command_modal_add_text", u'업로드가 완료되지 않아 게시글이 등록되지 않습니다.\n', namespace='/framework', broadcast=True)
+                    socketio.emit("command_modal_add_text", u'확인 후 다시 시도하세요.\n', namespace='/framework', broadcast=True)
+                socketio.emit("command_modal_add_text", u'\n모두 완료되었습니다.\n', namespace='/framework', broadcast=True)
             thread = threading.Thread(target=func, args=())
             thread.setDaemon(True)
             thread.start()
-            return my_remote_path
-            #return my_remote_path
+            return ''
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
 
+
+    def get_my_copy_path(self, board_type, category_type):
+        try:
+            tmp = ModelSetting.get_list('user_copy_dest_list', '\n')
+            remote_list = {}
+            for t in tmp:
+                t2 = t.split('=')
+                if len(t2) == 2 and t2[1].strip() != '':
+                    remote_list[t2[0].strip()] = t2[1].strip()
+            keys = [u'%s,%s' % (board_type, category_type), u'%s' % (board_type), 'default']
+
+            for key in keys:
+                if key in remote_list:
+                    return remote_list[key]
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+
+    def site_append(self, data):
+        try:
+            import requests
+            import json
+            response = requests.post("https://sjva.me/sjva/share_append2.php", data={'data':json.dumps(data)})
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+
+    def search_plex(self, keyword):
+        import plex
+        try:
+            data = plex.LogicNormal.find_by_filename_part(keyword)
+            ret  = dict()
+            ndirs  = 0
+            nfiles = 0
+            #logger.debug(data)
+            if len(data['list']) > 0:
+                for item in data['list']:
+                    if item['dir'] in ret:
+                        f = ret[item['dir']]['files']
+                        f.append({'filename': item['filename'], 'size_str':item['size_str']})
+                    else:
+                        remote_path = self.get_remote_path(item['dir'])
+                        ret[item['dir']] = {'remote_path': remote_path, 'files': [{'filename': item['filename'], 'size_str':item['size_str']}]}
+
+                ndirs = len(ret)
+                for k, v in ret.items(): nfiles = nfiles + len(v['files'])
+            logger.debug('search plex: keyword(%s), result(%d dirs, %d files)', keyword, ndirs, nfiles)
+            return ret
+
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+
+
+    def get_remote_path(self, filepath):
+        try:
+            rule = ModelSetting.get('user_plex_match_rule')
+            if rule is not None:
+                tmp = rule.split('|')
+                ret = filepath.replace(tmp[1], tmp[0])
+                if filepath[0] != '/':
+                    ret = ret.replace('\\', '/')
+                return ret.replace('//', '/').replace('\\\\', '\\')
+
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+            
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
 
 
@@ -740,10 +607,6 @@ class ModelShareItem(db.Model):
     def get_by_source_id(cls, source_id):
         return db.session.query(cls).filter_by(source_id=source_id).first()
     
-    
-
-
-
     @classmethod
     def web_list(cls, req):
         ret = {}
@@ -751,19 +614,21 @@ class ModelShareItem(db.Model):
         page_size = 30
         job_id = ''
         search = req.form['search_word'] if 'search_word' in req.form else ''
-        option = req.form['option'] if 'option' in req.form else 'all'
+        option1 = req.form['option1'] if 'option1' in req.form else 'all'
+        option2 = req.form['option2'] if 'option2' in req.form else 'all'
         order = req.form['order'] if 'order' in req.form else 'desc'
-        query = cls.make_query(search=search, order=order, option=option)
+        query = cls.make_query(search=search, order=order, option1=option1, option2=option2)
         count = query.count()
         query = query.limit(page_size).offset((page-1)*page_size)
         lists = query.all()
         ret['list'] = [item.as_dict() for item in lists]
         ret['paging'] = Util.get_paging_info(count, page, page_size)
+        ModelSetting.set('user_last_list_option', '%s|%s|%s|%s|%s' % (option1, option2, desc, search, page))
         return ret
 
 
     @classmethod
-    def make_query(cls, search='', order='desc', option='all'):
+    def make_query(cls, search='', order='desc', option1='all', option2='all'):
         query = db.session.query(cls)
         if search is not None and search != '':
             if search.find('|') != -1:
@@ -780,35 +645,9 @@ class ModelShareItem(db.Model):
                         query = query.filter(cls.target_name.like('%'+tt.strip()+'%'))
             else:
                 query = query.filter(cls.target_name.like('%'+search+'%'))
-        if option == 'completed':
-            query = query.filter(cls.status == 'completed')
-
+        if option1 != 'all':
+            query = query.filter(cls.board_type == option1)
+        if option2 != 'all':
+            query = query.filter(cls.status.like(option2 + '%'))
         query = query.order_by(desc(cls.id)) if order == 'desc' else query.order_by(cls.id)
         return query  
-
-    @classmethod
-    def get_list_incompleted(cls):
-        return db.session.query(cls).filter(cls.status != 'completed').all()
-
-    @classmethod
-    def append(cls, q):
-        item = ModelShareItem()
-        item.source_id = q['folder_id']
-        item.season = q['season']
-        item.episode_no = q['epi_queue']
-        item.title = q['content_title']
-        item.episode_title = q['title']
-        item.ani365_va = q['va']
-        item.ani365_vi = q['_vi']
-        item.ani365_id = q['_id']
-        item.quality = q['quality']
-        item.filepath = q['filepath']
-        item.filename = q['filename']
-        item.savepath = q['savepath']
-        item.video_url = q['url']
-        item.vtt_url = q['vtt']
-        item.thumbnail = q['thumbnail']
-        item.status = 'wait'
-        item.ani365_info = q['ani365_info']
-        item.save()
-
