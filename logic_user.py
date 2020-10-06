@@ -253,7 +253,7 @@ class LogicUser(LogicModuleBase):
         return ret
 
 
-    def do_download(self, db_id, clone_folder_id, recopy):
+    def do_download(self, db_id, clone_folder_id, is_relay):
         def func():
             try:
                 item = ModelShareItem.get_by_id(int(db_id))
@@ -265,12 +265,22 @@ class LogicUser(LogicModuleBase):
                 item.clone_folderid = clone_folder_id
                 #item.save()
                 remote_path = item.remote_path
-                if recopy:
-                    #remote_path = item.remote_path + '/tmp_' + item.source_id
+                if is_relay:
                     remote_path = ModelSetting.get('worker_remote').rstrip('/') + ('/%s' % item.id)
-                ret = RcloneTool2.do_user_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path)
+                    ret = RcloneTool2.do_relay_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path, item.source_id, item.remote_path)
+                    #remote_path = item.remote_path + '/tmp_' + item.source_id
+                else:
+                    ret = RcloneTool2.do_user_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path)
+
                 if ret:
-                    if recopy:
+                    item.status = 'completed'
+                    item.completed_time = datetime.now()
+                else:
+                    item.status = 'fail_move'
+                    item.completed_time = datetime.now()
+                """
+                if ret:
+                    if is_relay:
                         sourceid = RcloneTool2.getid(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), remote_path)
                         confirm_size = False
                         for i in range(10):
@@ -300,10 +310,12 @@ class LogicUser(LogicModuleBase):
                     else:
                         item.status = 'completed'
                         item.completed_time = datetime.now()
+                """
+
             except Exception as e: 
                 logger.error('Exception:%s', e)
                 logger.error(traceback.format_exc())
-                item.status = 'download_exception'
+                item.status = 'fail_download_exception'
             finally:
                 if item is not None:
                     item.save()
