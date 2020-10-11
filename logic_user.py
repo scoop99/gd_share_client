@@ -129,6 +129,7 @@ class LogicUser(LogicModuleBase):
                 count = int(req.form['count'])
                 ddns = req.form['ddns']
                 need_version = req.form['version']
+                copy_type = req.form['copy_type']
                 if ddns != SystemModelSetting.get('ddns'):
                     return {'ret':'wrong_ddns'}
                 
@@ -138,7 +139,7 @@ class LogicUser(LogicModuleBase):
                 current_version = int(tmp2[2]) * 100 + int(tmp2[3])
                 if need_version > current_version:
                     return {'ret':'need_update', 'current_version':version, 'need_version':need_version}
-                ret = self.add_copy(folder_id, folder_name, board_type, category_type, size, count)
+                ret = self.add_copy(folder_id, folder_name, board_type, category_type, size, count, copy_type=copy_type)
                 ret['current_version'] = version
                 return jsonify(ret)
             elif sub == 'vod_copy':
@@ -190,7 +191,7 @@ class LogicUser(LogicModuleBase):
     #################################################################
 
 
-    def add_copy(self, folder_id, folder_name, board_type, category_type, size, count, remote_path=None):
+    def add_copy(self, folder_id, folder_name, board_type, category_type, size, count, copy_type='folder', remote_path=None):
         try:
             ret = {'ret':'fail', 'remote_path':remote_path, 'server_response':None}
             
@@ -217,7 +218,7 @@ class LogicUser(LogicModuleBase):
                     return ret
 
             item = ModelShareItem()
-            item.copy_type = 'share'
+            item.copy_type = copy_type
             item.source_id = folder_id
             item.target_name = folder_name
             item.board_type = board_type
@@ -278,40 +279,6 @@ class LogicUser(LogicModuleBase):
                 else:
                     item.status = 'fail_move'
                     item.completed_time = datetime.now()
-                """
-                if ret:
-                    if is_relay:
-                        sourceid = RcloneTool2.getid(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), remote_path)
-                        confirm_size = False
-                        for i in range(10):
-                            tmp = RcloneTool2.size(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), remote_path)
-                            if tmp is not None and tmp['bytes'] == item.size:
-                                confirm_size = True
-                                break
-                            time.sleep(20)
-                        #if confirm_size == False:
-                        #    item.status = 'request_relay_size_diff'
-                        #    self.do_relay_completed(db_id, remote_path, item.remote_path)
-                        #    return
-                        url = P.SERVER_URL + '/gd_share_server/noapi/user/request_relay'
-                        data = {}
-                        data['id'] = db_id
-                        data['ddns'] = SystemModelSetting.get('ddns')
-                        data['sjva_me_id'] = SystemModelSetting.get('sjva_me_user_id')
-                        data['sourceid'] = sourceid
-                        data['targetid'] = item.source_id
-                        data['source_remote_path'] = remote_path
-                        data['original_remote_path'] = item.remote_path
-                        res = requests.post(url, data={'data':json.dumps(data)}).json()
-                        if res['ret'] == 'success':
-                            item.status = 'request_relay'
-                        else:
-                            item.status = 'request_relay_fail'
-                    else:
-                        item.status = 'completed'
-                        item.completed_time = datetime.now()
-                """
-
             except Exception as e: 
                 logger.error('Exception:%s', e)
                 logger.error(traceback.format_exc())
@@ -322,6 +289,7 @@ class LogicUser(LogicModuleBase):
         thread = threading.Thread(target=func, args=())
         thread.setDaemon(True)
         thread.start()
+
 
     def do_relay_completed(self, db_id, source_remote_path, original_remote_path):
         logger.debug('do_relay_completed db_id : %s, source_remote_path : %s, original_remote_path : %s', db_id, source_remote_path, original_remote_path)
