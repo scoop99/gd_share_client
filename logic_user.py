@@ -175,6 +175,7 @@ class LogicUser(LogicModuleBase):
                 about = req.form['about']
                 client_db_id = req.form['client_db_id']
                 ret = req.form['ret']
+                logger.debug('about : %s, client_db_id : %s, ret : %s', about, client_db_id, ret)
                 if about == 'request':
                     item = ModelShareItem.get_by_id(int(client_db_id))
                     item.status = req.form['ret']
@@ -239,7 +240,7 @@ class LogicUser(LogicModuleBase):
             res = requests.post(url, data={'data':json.dumps(data)})
 
             ret['server_response'] = res.json()
-            if 'db_id' in ret['server_response']:
+            if 'db_id' in ret['server_response'] and ret['server_response']['queue_name'] is not None:
                 item.status = 'request'
                 item.request_time = datetime.now()
                 item.save()
