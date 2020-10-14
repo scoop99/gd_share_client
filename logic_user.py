@@ -421,7 +421,7 @@ class LogicUser(LogicModuleBase):
 
     def get_my_copy_path(self, board_type, category_type):
         try:
-            tmp = ModelSetting.get_list('user_copy_dest_list', '\n')
+            tmp = ModelSetting.get_list('user_copy_dest_list', '\n', comment=None)
             remote_list = {}
             for t in tmp:
                 t2 = t.split('=')
