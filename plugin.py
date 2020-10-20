@@ -52,8 +52,7 @@ class P(object):
     logic = None
     module_list = None
     home_module = 'user'
-    #SERVER_URL = 'https://sjva-dev.soju6jan.com'
-    SERVER_URL = 'https://share-server.soju6jan.com'
+    SERVER_URL = 'https://share-server.con.soju6jan.com'
     plugin_small = None
 
 logger = P.logger
