@@ -21,20 +21,20 @@ class P(object):
     logger = get_logger(package_name)
     blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
     menu = {
-        'main' : [package_name, '구글 드라이브 공유'], 
+        'main' : [package_name, u'구글 드라이브 공유'], 
         'sub' : [
-            ['base', '기본'], ['user', '유저공유'], ['log', '로그']
+            ['base', u'기본'], ['user', u'유저공유'], ['log', u'로그']
         ],
         'category' : 'service',
         'sub2' : {
             'base' : [
-                ['setting', '기본 설정'], #['list', '목록']
+                ['setting', u'기본 설정'], #['list', '목록']
             ],
             #'av_sub' : [
             #    ['setting', '설정'], ['list', '목록'], ['detail', '세부정보'], ['transfer', '전송'], ['plex', 'PLEX에서 찾기']
             #],
             'user' : [
-                ['setting', '설정'], ['upload', '업로드'], ['list', '작업현황'] #['download_list', '다운로드 목록'],
+                ['setting', u'설정'], ['upload', u'업로드'], ['list', u'작업현황'] #['download_list', '다운로드 목록'],
             ]
         },
     }
@@ -43,7 +43,7 @@ class P(object):
         'name' : 'gd_share_client',
         'category_name' : 'service',
         'developer' : 'soju6jan',
-        'description' : '구글 드라이브 공유 클라이언트',
+        'description' : u'구글 드라이브 공유 클라이언트',
         'home' : 'https://github.com/soju6jan/gd_share_client',
         'more' : '',
         'policy_level' : 3,
