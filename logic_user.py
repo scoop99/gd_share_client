@@ -36,13 +36,14 @@ category_list = [
         [u'최신', 'MBoXLEq8fKHgb+XaQk52I+Q032HSO9LGCcSw7HBtB4CME2uXSlS4hd/uZpEWjuzN/9GWaZLFhSjQsxvdTmAVHw=='],
         [u'더빙', 'tSPKo3br/eemuusJfChrcu4iiizRPjTWqZ00XjwxzvXGJWsIYZNhm/NIumYQUrabrmyVnL+eywwqBSFQbK4QlA=='],
     ]},
-    { 'type' : 'share_ktv', 'name' : u'국내TV(종영)', 'list' : [
+    { 'type' : 'share_ktv', 'name' : u'국내TV', 'list' : [
         [u'드라마', 'dwlfA65x2nuOamUMGWiWtAhsPrZAlZSeJn4EtJv7X9xhnSOtrNT3Z9yndlej2bYDgB+8IlDRH5/mmmqCBLu2Mw=='], 
         [u'예능', 'qDWsbbUKi0SRoKTmZsyyCBlskNWvdSTa4foVvQp44wRnH21FHo/hyCMIX/2OJY69GO66INV7gjEC6XcBU/fqOw=='],
         [u'교양', 'MfaFitBzr0yR9R5gSqtb+uLLEfd/vfsC1zoqZAz5T+KlSihDrDwtHWk8Z0eLHNY9srtHbiGkFHtDergzRdKoqw=='],
         [u'어린이', '2z61qoJV1edZ7wYxHifQhyZ/3InC2IpnjKD7jNT8EPWgmue7x/3XhFhW2paRfV3xpuz4iYca/uL7ve8TxvxlPQ=='],
+        [u'방영중', ''],
     ]},
-    { 'type' : 'share_ftv', 'name' : u'외국TV(종영)', 'list' : [
+    { 'type' : 'share_ftv', 'name' : u'외국TV', 'list' : [
         [u'미드', 'bHVNM4AGa97w+2FyVnm+VVzLoKABmVPkw7n9MKBVGGlYeMbCIVZVJxx0eVla6/HUgsKPgEQoAsLaPomXfi4hYg=='],
         [u'일드', 'P5FWMumhVh3O8ZF28pfKWSo6369bmJ3eSdbG0dlhOSPQwgLe6GjEsHL1JWOQaebg+7gzGJpyy2dfhlSy09BAtQ=='],
         [u'중드', 'ql9h28mK4z+oiDPoX40Olr2ZD/ZEPZQMg6cDhjH4IUR+RGF7aaWGJ61+Czs3MrF6Xwx5TBI9ojM3UyY+V3aPgg=='],
@@ -51,6 +52,7 @@ category_list = [
         [u'애니', 'TSrz92ELuunV/w+V9bidX5BMs5Q+9AFXi8FhGr90cFNOyXsHHcaJrofFyvM0yiVFljAb3ADIoHje0sxg/V9NMA=='],
         [u'더빙', 'TCKh+GXEKJ+Iq4Kttkr9N01ql+CFegL0IK/klxawqhXrAPgZfvMi8mqVA5R+MY8xsp/YNjrjbgxKgd4dI9k8kQ=='],
         [u'기타', 'jmV/xj8ocJXyjcErMqMv9QvM7TwhXWDGXTx9q3NLPyAcQikcRlZPuXxoOZLh7aLMqtvV0imkFqtvfQSoWp+Wgw=='],
+        [u'방영중', ''],
     ]},
     { 'type' : 'share_etc', 'name' : u'기타', 'list' : [
         #[u'전체', 'dsm4G8aizyDJ+8VHHU7OIs6gQcrcBoiHSfh37znDcbKJLPcXqIllSDSYzuFFy+j675yNX+4tMCPvsHdxZZ0mGw=='],
