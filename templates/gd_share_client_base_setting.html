@@ -59,21 +59,7 @@ $(document).ready(function(){
 
 $("body").on('click', '#worker_test_btn', function(e) {
   e.preventDefault();
-  worker_remote = document.getElementById('worker_remote').value;
-  $.ajax({
-    url: '/' + package_name + '/ajax/'+sub+'/worker_remote_test',
-    type: "POST", 
-    cache: false,
-    data: {worker_remote:worker_remote},
-    dataType: "json",
-    success: function (data) {
-      if (data.ret == 'success') {
-        $.notify('<strong>Relay 공유가 가능합니다.<strong>', {type: 'success'});
-      }else {
-        $.notify('<strong>설정이 잘못 되어 있습니다.</strong>', {type: 'warning'});
-      }
-    }
-  });
+  global_relay_test(document.getElementById('worker_remote').value);
 });
 
 $("body").on('click', '#rclone_lsjson_btn', function(e) {

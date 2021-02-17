@@ -74,13 +74,14 @@ class LogicBase(LogicModuleBase):
                 with open(rclone_config_path, 'w') as f: 
                     f.write(data)
                 return jsonify(True)
-            elif sub == 'worker_remote_test':
-                worker_remote = req.form['worker_remote']
-                can_use_relay = RcloneTool2.can_use_relay(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), worker_remote)
+            elif sub == 'relay_test':
+                remote = req.form['remote']
+                can_use_relay = RcloneTool2.can_use_relay(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), remote)
                 ret = {'ret' : 'success'}
                 if not can_use_relay:
                     ret['ret'] = 'wrong_setting'
                 return jsonify(ret)
+
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
