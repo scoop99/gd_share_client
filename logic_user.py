@@ -214,11 +214,13 @@ class LogicUser(LogicModuleBase):
                 ret['ret'] = 'cannot_access'
                 return ret
             
-            if board_type in ['bot_downloader_av', 'torrent_av']:
+            
+            if board_type.startswith('bot_downloader') or board_type.startswith('torrent'):
                 can_use_relay = RcloneTool2.can_use_relay(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), ModelSetting.get('worker_remote'))
                 if not can_use_relay:
                     ret['ret'] = 'wrong_setting'
                     return ret
+            
 
             item = ModelShareItem()
             item.copy_type = copy_type
