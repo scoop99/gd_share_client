@@ -143,6 +143,8 @@ class LogicUser(LogicModuleBase):
                     return {'ret':'need_update', 'current_version':version, 'need_version':need_version}
                 ret = self.add_copy(folder_id, folder_name, board_type, category_type, size, count, copy_type=copy_type)
                 ret['current_version'] = version
+
+                logger.debug(ret)
                 return jsonify(ret)
             elif sub == 'vod_copy':
                 fileid = req.form['fileid']
@@ -214,13 +216,14 @@ class LogicUser(LogicModuleBase):
                 ret['ret'] = 'cannot_access'
                 return ret
             
-            
+            """
             if board_type.startswith('bot_downloader') or board_type.startswith('torrent'):
                 can_use_relay = RcloneTool2.can_use_relay(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), ModelSetting.get('worker_remote'))
                 if not can_use_relay:
                     ret['ret'] = 'wrong_setting'
                     return ret
-            
+            """
+
 
             item = ModelShareItem()
             item.copy_type = copy_type
