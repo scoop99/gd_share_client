@@ -30,46 +30,13 @@ from .plugin import P, logger, package_name, ModelSetting
 #########################################################
 
 category_list = [
-    { 'type' : 'share_movie', 'name' : u'영화', 'list' : [
-        [u'국내', '+3GSRdSQqijI/FUenjzYeuLwvpTQSWsP21UbPT1LCi7yxz3n3M6KpmkfIAkU4W3uRZFMwMET0R5J2kkpq8mk6Q=='], 
-        [u'외국', 't7KWVIHwgW/96Pjd/poo+tVmAgMyIt/Cga83rOLQqK5T0jh/OGKzt9Csvbfr4vfcPvoJ8o8cd8AaEHC5iLtx1Q=='],
-        [u'최신', 'MBoXLEq8fKHgb+XaQk52I+Q032HSO9LGCcSw7HBtB4CME2uXSlS4hd/uZpEWjuzN/9GWaZLFhSjQsxvdTmAVHw=='],
-        [u'더빙', 'tSPKo3br/eemuusJfChrcu4iiizRPjTWqZ00XjwxzvXGJWsIYZNhm/NIumYQUrabrmyVnL+eywwqBSFQbK4QlA=='],
-    ]},
-    { 'type' : 'share_ktv', 'name' : u'국내TV', 'list' : [
-        [u'드라마', 'dwlfA65x2nuOamUMGWiWtAhsPrZAlZSeJn4EtJv7X9xhnSOtrNT3Z9yndlej2bYDgB+8IlDRH5/mmmqCBLu2Mw=='], 
-        [u'예능', 'qDWsbbUKi0SRoKTmZsyyCBlskNWvdSTa4foVvQp44wRnH21FHo/hyCMIX/2OJY69GO66INV7gjEC6XcBU/fqOw=='],
-        [u'교양', 'MfaFitBzr0yR9R5gSqtb+uLLEfd/vfsC1zoqZAz5T+KlSihDrDwtHWk8Z0eLHNY9srtHbiGkFHtDergzRdKoqw=='],
-        [u'어린이', '2z61qoJV1edZ7wYxHifQhyZ/3InC2IpnjKD7jNT8EPWgmue7x/3XhFhW2paRfV3xpuz4iYca/uL7ve8TxvxlPQ=='],
-        [u'기타', ''],
-    ]},
-    { 'type' : 'share_ftv', 'name' : u'외국TV', 'list' : [
-        [u'미드', 'bHVNM4AGa97w+2FyVnm+VVzLoKABmVPkw7n9MKBVGGlYeMbCIVZVJxx0eVla6/HUgsKPgEQoAsLaPomXfi4hYg=='],
-        [u'일드', 'P5FWMumhVh3O8ZF28pfKWSo6369bmJ3eSdbG0dlhOSPQwgLe6GjEsHL1JWOQaebg+7gzGJpyy2dfhlSy09BAtQ=='],
-        [u'중드', 'ql9h28mK4z+oiDPoX40Olr2ZD/ZEPZQMg6cDhjH4IUR+RGF7aaWGJ61+Czs3MrF6Xwx5TBI9ojM3UyY+V3aPgg=='],
-        [u'영드', 'i0zTjWaVHSvs7gGmDvMTTk5vxB2k7Q6tl3+PRMRWxzfA2DQFPxORU61yRmGu42GbSZZlIWifjHXOLhWy4N+Nxw=='],
-        [u'다큐', '+NCMKzYZ/nExNICfcJNGiYWgnOvv7Y46z9ZvzcosQrlecgXojpt88+g079dh5qh4jSsp3bZ0cebRXuFTVmQcMw=='],
-        [u'애니', 'TSrz92ELuunV/w+V9bidX5BMs5Q+9AFXi8FhGr90cFNOyXsHHcaJrofFyvM0yiVFljAb3ADIoHje0sxg/V9NMA=='],
-        [u'더빙', 'TCKh+GXEKJ+Iq4Kttkr9N01ql+CFegL0IK/klxawqhXrAPgZfvMi8mqVA5R+MY8xsp/YNjrjbgxKgd4dI9k8kQ=='],
-        [u'기타', 'jmV/xj8ocJXyjcErMqMv9QvM7TwhXWDGXTx9q3NLPyAcQikcRlZPuXxoOZLh7aLMqtvV0imkFqtvfQSoWp+Wgw=='],
-        [u'방영중', ''],
-    ]},
-    { 'type' : 'share_etc', 'name' : u'기타', 'list' : [
-        #[u'전체', 'dsm4G8aizyDJ+8VHHU7OIs6gQcrcBoiHSfh37znDcbKJLPcXqIllSDSYzuFFy+j675yNX+4tMCPvsHdxZZ0mGw=='],
-        [u'영상', 'c7sXC6+8vX7bnMeMS4X6pua9dCMoscokm3Zp2OHA4Cfj72/9Tk0/MVpPxp8N4LsRX2DLE7Q5L5VL0kE+kkpG+w=='],
-        [u'음악', 'GN0gqbjMc+UjSDYu9IdJGLrlk7Oib8BM+eAJNLpDlmh9bFpO24TCB8Z6Ory5z2pBmMYMNv1YWxdmNYtJz7GIxA=='],
-        [u'SW', 'lDbIydMTTDHbGraHDU7QLQeMPFe/XVuw23oa3heuxXPx8fnhSNeBGJeYXfvp3/uQsWa6/KBm0BbLrJlHqzs0vQ=='],
-        [u'리딩', ''],
-        [u'기타', '8EwvmvMsldeg80cxZvAhr7tZEB4ASlBWo6HeE5iZ4Rph0ymxd/vlXxiifbR7n19YTUaspxlJEAyCuEq5cfPJWg=='],
-    ]},
-    { 'type' : 'share_private', 'name' : u'등록안함', 'list' : [
-        [u'전체', 'MlqqdV/Rh9AJqVCSKBU2sOxH0j5f7oOkP4ZYPTph2botAwfdbMNPQo/73zT/Tcp6BcOdVRdiV27tuY8KGNq2aQ=='], 
-    ]},
+    { 'type' : 'share_movie', 'name' : u'영화', 'category_list' : [u'국내', u'외국', u'최신', u'더빙']},
+    { 'type' : 'share_ktv', 'name' : u'국내TV', 'category_list' : [u'드라마', u'예능', u'교양', u'어린이', u'기타']},
+    { 'type' : 'share_ftv', 'name' : u'외국TV', 'category_list' : [u'미드', u'일드', u'중드', u'영드', u'다큐', u'애니', u'더빙', u'기타', u'방영중']},
+    { 'type' : 'share_etc', 'name' : u'기타', 'category_list' : [u'영상', u'음악', u'SW', u'리딩', u'기타']},
 ]
 
 class LogicUser(LogicModuleBase):
-    
-
     instance = None
     db_default = { 
         'user_copy_dest_list' : u'default = \nshare_movie,국내 = \nshare_movie,외국 = \nshare_ktv,드라마 = \nshare_ktv,예능 = \nshare_ktv,교양 = \nshare_ftv = \nshare_etc = ',
@@ -127,8 +94,15 @@ class LogicUser(LogicModuleBase):
                 folder_name = req.form['folder_name']
                 board_type = req.form['board_type']
                 category_type = req.form['category_type']
-                size = int(req.form['size'])
-                count = int(req.form['count'])
+
+                logger.debug(board_type)
+                logger.debug(category_type)
+                if board_type == 'share_manual':
+                    size = -1
+                    count = -1
+                else:
+                    size = int(req.form['size'])
+                    count = int(req.form['count'])
                 ddns = req.form['ddns']
                 need_version = req.form['version']
                 copy_type = req.form['copy_type']
@@ -171,8 +145,7 @@ class LogicUser(LogicModuleBase):
             if sub == 'copy_completed':
                 clone_folder_id = req.form['clone_folder_id']
                 client_db_id = req.form['client_db_id']
-                recopy = (req.form['recopy'] == 'True')
-                self.do_download(client_db_id, clone_folder_id, recopy)
+                self.do_download(client_db_id, clone_folder_id)
                 ret = {'ret':'success'}
                 return jsonify(ret)
             elif sub == 'callback':
@@ -184,9 +157,6 @@ class LogicUser(LogicModuleBase):
                     item = ModelShareItem.get_by_id(int(client_db_id))
                     item.status = req.form['ret']
                     item.save()
-                elif about == 'relay_completed':
-                    if ret == 'success':
-                        self.do_relay_completed(client_db_id, req.form['source_remote_path'], req.form['original_remote_path'])
                 ret = {'ret':'success'}
                 return jsonify(ret)
         except Exception as e: 
@@ -262,7 +232,7 @@ class LogicUser(LogicModuleBase):
         return ret
 
 
-    def do_download(self, db_id, clone_folder_id, is_relay):
+    def do_download(self, db_id, clone_folder_id):
         def func():
             try:
                 item = ModelShareItem.get_by_id(int(db_id))
@@ -274,12 +244,14 @@ class LogicUser(LogicModuleBase):
                 item.clone_folderid = clone_folder_id
                 #item.save()
                 remote_path = item.remote_path
+                """
                 if is_relay:
                     remote_path = ModelSetting.get('worker_remote').rstrip('/') + ('/%s' % item.id)
                     ret = RcloneTool2.do_relay_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path, item.source_id, item.remote_path)
                     #remote_path = item.remote_path + '/tmp_' + item.source_id
                 else:
-                    ret = RcloneTool2.do_user_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path)
+                """
+                ret = RcloneTool2.do_user_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path)
 
                 if ret:
                     item.status = 'completed'
@@ -299,32 +271,6 @@ class LogicUser(LogicModuleBase):
         thread.start()
 
 
-    def do_relay_completed(self, db_id, source_remote_path, original_remote_path):
-        logger.debug('do_relay_completed db_id : %s, source_remote_path : %s, original_remote_path : %s', db_id, source_remote_path, original_remote_path)
-        def func():
-            try:
-                item = ModelShareItem.get_by_id(int(db_id))
-                if item is None:
-                    logger.error('CRITICAL ERROR do_relay_completed : %s', db_id)
-                    return
-                ret = RcloneTool2.do_relay_completed(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), source_remote_path, original_remote_path)
-                if ret:
-                    item.status = 'relay_completed'
-                else:
-                    item.status = 'relay_completed_fail'
-                item.completed_time = datetime.now()
-            except Exception as e: 
-                logger.error('Exception:%s', e)
-                logger.error(traceback.format_exc())
-                item.status = 'download_exception'
-            finally:
-                if item is not None:
-                    item.save()
-        thread = threading.Thread(target=func, args=())
-        thread.setDaemon(True)
-        thread.start()
-
-    
     def vod_copy(self, fileid, remote_path):
         try:
             if remote_path is None:
@@ -382,7 +328,6 @@ class LogicUser(LogicModuleBase):
     def do_action(self, req):
         try:
             upload_folderid = '1HgFbtNtWOUZPaG9VaW032VgF64aEgIiF'
-            folder_id = req.form['folder_id']
             my_remote_path = req.form['my_remote_path']
             
             # 게시판
@@ -402,7 +347,7 @@ class LogicUser(LogicModuleBase):
                 board_content = board_content[board_content.find('\n'):]
 
             def func():
-                ret = RcloneTool2.do_user_upload(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), my_remote_path, folder_name, '1HgFbtNtWOUZPaG9VaW032VgF64aEgIiF', board_type, category_type, is_move=(action=='move'))
+                ret = RcloneTool2.do_user_upload(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), my_remote_path, folder_name, upload_folderid, board_type, category_type, is_move=(action=='move'))
 
                 if ret['completed']:
                     if board_type != 'share_private' and ret['folder_id'] != '':
