@@ -97,6 +97,7 @@ class LogicUser(LogicModuleBase):
 
                 logger.debug(board_type)
                 logger.debug(category_type)
+
                 size = int(req.form['size'])
                 count = int(req.form['count'])
                 ddns = req.form['ddns']
@@ -247,6 +248,7 @@ class LogicUser(LogicModuleBase):
                     #remote_path = item.remote_path + '/tmp_' + item.source_id
                 else:
                 """
+                change_parent_arg = None
                 if item.board_type.startswith('share'):
                     change_parent_arg = item.target_name
                 ret = RcloneTool2.do_user_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path, change_parent_arg=change_parent_arg)
