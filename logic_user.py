@@ -97,12 +97,8 @@ class LogicUser(LogicModuleBase):
 
                 logger.debug(board_type)
                 logger.debug(category_type)
-                if board_type == 'share_manual':
-                    size = -1
-                    count = -1
-                else:
-                    size = int(req.form['size'])
-                    count = int(req.form['count'])
+                size = int(req.form['size'])
+                count = int(req.form['count'])
                 ddns = req.form['ddns']
                 need_version = req.form['version']
                 copy_type = req.form['copy_type']
