@@ -331,7 +331,7 @@ class LogicUser(LogicModuleBase):
 
     def do_action(self, req):
         try:
-            upload_folderid = '1HgFbtNtWOUZPaG9VaW032VgF64aEgIiF'
+            upload_folderid = '1zO0FIExK4izwV93R0cYSZ13KW-TUVntC'
             my_remote_path = req.form['my_remote_path']
             
             # 게시판
