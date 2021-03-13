@@ -214,11 +214,19 @@ class LogicUser(LogicModuleBase):
             res = requests.post(url, data={'data':json.dumps(data)})
 
             ret['server_response'] = res.json()
-            if 'db_id' in ret['server_response'] and ret['server_response']['queue_name'] is not None:
-                item.status = 'request'
+            if ret['server_response']['ret'] == 'enqueue':
+                if 'db_id' in ret['server_response'] and ret['server_response']['queue_name'] is not None:
+                    item.status = 'request'
+                    item.request_time = datetime.now()
+                    item.save()
+                    ret['ret'] = 'success'
+            else:
+                item.status = ret['server_response']['ret']
                 item.request_time = datetime.now()
                 item.save()
-            ret['ret'] = 'success'
+                ret['ret'] = ret['server_response']['ret']
+
+            
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
