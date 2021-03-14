@@ -222,8 +222,8 @@ class LogicUser(LogicModuleBase):
                     ret['ret'] = 'success'
             else:
                 item.status = ret['server_response']['ret']
-                item.request_time = datetime.now()
-                item.save()
+                #item.request_time = datetime.now()
+                #item.save()
                 ret['ret'] = ret['server_response']['ret']
 
             
