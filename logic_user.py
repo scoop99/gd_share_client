@@ -30,7 +30,7 @@ from .plugin import P, logger, package_name, ModelSetting
 #########################################################
 
 category_list = [
-    { 'type' : 'share_movie', 'name' : u'영화', 'category_list' : [u'국내', u'외국', u'최신', u'더빙']},
+    { 'type' : 'share_movie', 'name' : u'영화', 'category_list' : [u'국내', u'외국', u'최신', u'더빙', u'최고품질', '3D']},
     { 'type' : 'share_ktv', 'name' : u'국내TV', 'category_list' : [u'드라마', u'예능', u'교양', u'어린이', u'기타']},
     { 'type' : 'share_ftv', 'name' : u'외국TV', 'category_list' : [u'미드', u'일드', u'중드', u'영드', u'다큐', u'애니', u'더빙', u'기타', u'방영중']},
     { 'type' : 'share_etc', 'name' : u'기타', 'category_list' : [u'영상', u'음악', u'SW', u'리딩', u'기타']},
