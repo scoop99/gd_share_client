@@ -263,6 +263,13 @@ class LogicUser(LogicModuleBase):
                     change_parent_arg = item.target_name
                 ret = RcloneTool2.do_user_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path, change_parent_arg=change_parent_arg)
                 """
+                try:
+                    if item.board_type == 'vod':
+                        size_data = RcloneTool2.size(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), clone_folderid)
+                        logger.debug('vod size_data : %s', size_data)
+                except Exception as e: 
+                    logger.error('Exception:%s', e)
+                    logger.error(traceback.format_exc())
                 ret = RcloneTool2.do_user_download(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), item.clone_folderid, remote_path)
 
                 if ret:
