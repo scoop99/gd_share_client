@@ -265,7 +265,7 @@ class LogicUser(LogicModuleBase):
                 """
                 try:
                     if item.board_type == 'vod':
-                        size_data = RcloneTool2.size(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), clone_folder_id)
+                        size_data = RcloneTool2.size(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), '%s:{%s}' % (remote_path.split(':')[0], clone_folder_id))
                         logger.debug('vod size_data : %s', size_data)
                 except Exception as e: 
                     logger.error('Exception:%s', e)
