@@ -1,1 +1,10 @@
-{"version": "0.2.0.0", "name": "gd_share_client", "category_name": "service", "developer": "soju6jan", "description": "\uad6c\uae00 \ub4dc\ub77c\uc774\ube0c \uacf5\uc720 \ud074\ub77c\uc774\uc5b8\ud2b8", "home": "https://github.com/soju6jan/gd_share_client", "more": "", "policy_level": 3}
+{
+    "version": "0.2.0.0",
+    "name": "gd_share_client",
+    "category_name": "service",
+    "developer": "soju6jan",
+    "description": "구글 드라이브 공유 클라이언트",
+    "home": "https://github.com/soju6jan/gd_share_client",
+    "more": "",
+    "policy_level": 3
+}
