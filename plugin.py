@@ -52,7 +52,7 @@ class P(object):
     logic = None
     module_list = None
     home_module = 'user'
-    SERVER_URL = 'https://server.sjva.me'
+    SERVER_URL = app.config['DEFINE']['MAIN_SERVER_URL']
     plugin_small = None
 
 logger = P.logger
