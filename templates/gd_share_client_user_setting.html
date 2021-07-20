@@ -18,7 +18,8 @@
       {{ macros.setting_input_textarea('user_copy_dest_list', 'Copy Dest 리모트 정보', desc=['copy 리모트 정보', '형식 : 게시판이름,카테고리 = 리모트경로', '예) share_movie,국내 = my_remote:/video/movie/download', '게시판이름,카테고리가 정보가 있는 경우 설정된 곳으로 복사합니다.', '게시판이름만 있는 경우 카테고리에 상관없이 설정된 값에 복사합니다.', '정보가 없는 경우 default 에 복사합니다. default 값은 필수입니다.'], value=arg['user_copy_dest_list'], row='12') }}
     {{ macros.m_tab_content_end() }}
     {{ macros.m_tab_content_start('advanced', false) }}
-      {{ macros.setting_input_text('user_plex_match_rule', 'PLEX 변환규칙', value=arg['user_plex_match_rule'], desc=['자료 업로드시 Plex 검색을 이용할 경우에 사용', '형식: remote 경로|Plex 상의 경로', '예: gdrive:/|N: (구글드라이브 루트가 Plex 서버에서 N:으로 매칭)', '예: my_remote:/av|/volume1/gdrive/av (구글드라이브 av 폴더가 시놀 /voluem1/gdrive/av 폴더로 매칭)']) }}
+      {{ macros.setting_checkbox('user_upload_search_local', '업로드 폴더검색유형', value=arg['user_upload_search_local'], desc=['On: 로컬마운트 경로 탐색, Off: 연동된 Plex 서버 검색']) }}
+      {{ macros.setting_input_text('user_plex_match_rule', '경로 변환규칙', value=arg['user_plex_match_rule'], desc=['자료 업로드시 검색을 이용할 경우에 사용', '형식: remote 경로|유형애따른마운트경로', '검색유형이 On인경우(로컬): gdrive:|/mnt/gdrive: (구글드라이브 루트가 로컬에/mnt/gdrive으로 마운트된경우)', '검색유형이 Off인경우(Plex): my_remote:/av|P: (구글드라이브 av 폴더가 Plex서버에 P:로 마운트된경우)']) }}
     {{ macros.m_tab_content_end() }}
   </div><!--tab-content-->
   </form>

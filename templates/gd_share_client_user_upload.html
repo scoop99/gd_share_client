@@ -6,7 +6,7 @@
 
     {{ macros.setting_select_empty('board_type', '게시판', col='6') }}
     {{ macros.setting_select_empty('category_type', '카테고리', col='6') }}
-    {{ macros.setting_input_text_and_buttons('my_remote_path', 'My 리모트 경로', [['rclone_lsjson_btn', '내용 보기'], ['rclone_size_btn', '크기 확인'], ['search_plex_modal_btn', 'Plex검색']], value=arg['defalut_remote_path'], desc=['업로드 할 컨텐츠 폴더']) }}
+    {{ macros.setting_input_text_and_buttons('my_remote_path', 'My 리모트 경로', [['search_btn', '검색'],['rclone_lsjson_btn', '내용 보기'],['rclone_size_btn', '크기 확인']], value=arg['defalut_remote_path'], desc=['업로드 할 컨텐츠 폴더']) }}
     {{ macros.info_text('size_info', '업로드 폴더 정보') }}
     {{ macros.setting_input_text_and_buttons('folder_name', '폴더명', desc=['시즌1, season 1 과 같은 내용을 특정할 수 없는 폴더명은 수동으로 수정해주세요.']) }}
 
@@ -63,6 +63,10 @@
 var package_name = "{{arg['package_name'] }}";
 var sub = "{{arg['sub'] }}";
 var current_data = null;
+var rule = "{{arg['user_plex_match_rule']}}".split('|');
+var remote_path = rule[0];
+var local_path = rule[1];
+var user_upload_search_local = "{{arg['user_upload_search_local']}}"
 //var current_daum_info = null;
 
 $(document).ready(function(){
@@ -210,6 +214,15 @@ $("body").on('click', '#get_daum_info_btn', function(e) {
   });
 });
 
+$("body").on('click', '#search_btn', function(e) {
+  e.preventDefault();
+  if (user_upload_search_local == 'True') {
+    local_search_modal();
+  } else {
+    plex_search_modal();
+  }
+});
+
 $("body").on('click', '#plex_search_btn', function(e) {
   e.preventDefault();
   keyword = document.getElementById('search_plex_keyword').value;
@@ -317,10 +330,19 @@ function do_action(action) {
   });
 }
 
-$("body").on('click', '#search_plex_modal_btn', function(e) {
-  e.preventDefault();
+function plex_search_modal() {
   $("#plex_search_modal").modal();
-});
+};
+
+//$('#search_local_btn').click((evt) => {
+function local_search_modal() {
+  let add_path = '/';
+  m_select_local_file_modal("경로 선택", local_path, 'true', function(result){
+    var gdpath = result.replace(local_path, remote_path);
+    $('#my_remote_path').val(gdpath);
+  });
+  return false;
+}
 
 </script>    
 {% endblock %}
