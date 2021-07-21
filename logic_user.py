@@ -40,6 +40,7 @@ class LogicUser(LogicModuleBase):
     instance = None
     db_default = { 
         'user_copy_dest_list' : u'default = \nshare_movie,국내 = \nshare_movie,외국 = \nshare_ktv,드라마 = \nshare_ktv,예능 = \nshare_ktv,교양 = \nshare_ftv = \nshare_etc = ',
+        'user_upload_search_local': 'False',
         'user_plex_match_rule': '',
         'user_last_list_option' : '',
     }
@@ -81,6 +82,10 @@ class LogicUser(LogicModuleBase):
                 return jsonify(ModelShareItem.web_list(req))
             elif sub == 'db_remove':
                 return jsonify(ModelShareItem.delete_by_id(req.form['id']))
+            elif sub == 'add_copy_force':
+                item_id = int(req.form['item_id'])
+                ret = self.add_copy_force(item_id)
+                return jsonify(ret)
            
         except Exception as e: 
             logger.error('Exception:%s', e)
@@ -142,6 +147,7 @@ class LogicUser(LogicModuleBase):
             if sub == 'copy_completed':
                 clone_folder_id = req.form['clone_folder_id']
                 client_db_id = req.form['client_db_id']
+                logger.debug(f'copy_complted: {client_db_id}, {clone_folder_id}')
                 self.do_download(client_db_id, clone_folder_id)
                 ret = {'ret':'success'}
                 return jsonify(ret)
@@ -227,6 +233,45 @@ class LogicUser(LogicModuleBase):
                 ret['ret'] = ret['server_response']['ret']
 
             
+        except Exception as e: 
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+            ret['ret'] = 'fail'
+            ret['log'] = str(e)
+
+        logger.debug(ret)
+        return ret
+
+
+
+    def add_copy_force(self, item_id):
+        try:
+            item = ModelShareItem.get_by_id(item_id)
+            logger.debug(f'복사 재요청!!!!! {item_id}')
+            ret = {'ret':'fail', 'remote_path':item.remote_path, 'server_response':None}
+            can_use_share_flag = RcloneTool2.can_use_share(ModelSetting.get('rclone_path'), ModelSetting.get('rclone_config_path'), ret['remote_path'])
+            if not can_use_share_flag:
+                ret['ret'] = 'cannot_access'
+                return ret
+
+            data = item.as_dict()
+            data['ddns'] = SystemModelSetting.get('ddns')
+            data['sjva_me_id'] = SystemModelSetting.get('sjva_me_user_id')
+            data['version'] = version
+            url = P.SERVER_URL + '/gd_share_server/noapi/user/request'
+            res = requests.post(url, data={'data':json.dumps(data)})
+
+            ret['server_response'] = res.json()
+            if ret['server_response']['ret'] == 'enqueue':
+                if 'db_id' in ret['server_response'] and ret['server_response']['queue_name'] is not None:
+                    item.status = 'request'
+                    item.request_time = datetime.now()
+                    item.save()
+                    ret['ret'] = 'success'
+            else:
+                item.status = ret['server_response']['ret']
+                ret['ret'] = ret['server_response']['ret']
+
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())

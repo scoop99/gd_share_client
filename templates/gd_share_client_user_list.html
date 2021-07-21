@@ -19,6 +19,7 @@
             <option value="torrent_ktv">torrent_ktv</option>
             <option value="torrent_movie">torrent_movie</option>
             <option value="torrent_av">torrent_av</option>
+            <option value="vod">vod</option>
           </select>
           <select id="option2" name="option2" class="form-control form-control-sm">
             <option value="all">전체</option>
@@ -56,6 +57,7 @@
 var package_name = "{{arg['package_name']}}";
 var sub = "{{arg['sub']}}";
 var current_data = null;
+var current_page = '1';
 var user_last_list_option = "{{arg['user_last_list_option']}}";
 
 $(document).ready(function(){
@@ -78,11 +80,13 @@ $("#search").click(function(e) {
 
 $("body").on('click', '#page', function(e){
   e.preventDefault();
+  current_page = $(this).data('page');
   global_sub_request_search($(this).data('page'));
 });
 
 function make_list(data) {
   str = '';
+  var now = Date.now();
   for (i in data) {
     str += m_row_start();
     str += m_col(1, data[i].id);
@@ -104,7 +108,26 @@ function make_list(data) {
     if (data[i].clone_completed_time != null) tmp += '<br>' + data[i].clone_completed_time + '(서버 복사 완료)';
     if (data[i].completed_time != null) tmp += '<br>' + data[i].completed_time + '(내 리모트 이동 완료)';
     tmp2 = m_button('global_json_btn', 'JSON', [{'key':'id', 'value':data[i].id}]);
-    tmp2 += m_button('global_remove_btn', '삭제', [{'key':'id', 'value':data[i].id}]);
+    if (data[i].status == 'ready' || data[i].status == 'fail') {
+      var crtime  = Date.parse(data[i].created_time);
+      var min_diff = (now - crtime)/60000;
+      if (min_diff > 10) {
+        tmp2 += m_button2('force_recopy_btn', '재요청', [{'key':'id', 'value':data[i].id}], 'info');
+      }
+    } else if (data[i].status == 'request') {
+      var reqtime = Date.parse(data[i].request_time);
+      var min_diff = (now - reqtime)/60000;
+      if (data[i].board_type == 'manual') {
+        if (min_diff > 30) {
+          tmp2 += m_button2('force_recopy_btn', '재요청', [{'key':'id', 'value':data[i].id}], 'info');
+        }
+      } else {
+        if (min_diff > 10) {
+          tmp2 += m_button2('force_recopy_btn', '재요청', [{'key':'id', 'value':data[i].id}], 'info');
+        }
+      }
+    }
+    tmp2 += m_button2('global_remove_btn', '삭제', [{'key':'id', 'value':data[i].id}], 'danger');
     tmp += '<br>' + m_button_group(tmp2)
     str += m_col(4, tmp)
     str += m_row_end();
@@ -121,6 +144,26 @@ $("body").on('click', '#reset_btn', function(e){
   document.getElementById("option2").value = 'all';
   document.getElementById("search_word").value = '';
   global_sub_request_search('1')
+});
+
+$("body").on('click', '#force_recopy_btn', function(e){
+  e.preventDefault();
+  item_id = $(this).data('id');
+  $.ajax({
+    url: '/' + package_name + '/ajax/' + sub + '/add_copy_force',
+    type: "POST",
+    cache: false,
+    data: {item_id:item_id},
+    dataType: "json",
+    success: function (data) {
+      if (data.ret == 'success' && data.server_response.ret == 'enqueue') {
+        $.notify('<strong>재요청을 완료하였습니다.</strong>', {type: 'success'});
+      } else {
+        $.notify('<strong>재요청이 실패하였습니다.</strong>', {type: 'warning'});
+      }
+      global_sub_request_search(current_page);
+    }
+  });
 });
 
 
