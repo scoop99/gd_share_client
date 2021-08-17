@@ -21,7 +21,7 @@ from framework import app, db, scheduler, path_app_root, path_data
 from framework.job import Job
 from framework.util import Util
 from framework.common.share import RcloneTool, RcloneTool2
-from framework.common.plugin import LogicModuleBase
+from plugin import LogicModuleBase
 
 # 패키지
 from .plugin import P, logger, package_name,  ModelSetting
