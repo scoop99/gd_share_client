@@ -208,6 +208,7 @@ $("body").on('click', '#get_daum_info_btn', function(e) {
         document.getElementById('board_daum_url').value = data.daum_url;
       }
       document.getElementById('daum_info_div').innerHTML = str;
+      document.getElementById('board_title').value = data.upload_title;
       //current_daum_info = data
       document.getElementById('daum_info').value = JSON.stringify(data);
     }
