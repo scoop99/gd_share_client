@@ -24,7 +24,7 @@ from framework.util import Util
 from framework.common.share import RcloneTool, RcloneTool2
 from system.model import ModelSetting as SystemModelSetting
 from plugin import LogicModuleBase
-from tool_base import ToolBaseFile
+from tool_base import ToolBaseFile, d
 # 패키지
 from .plugin import P, logger, package_name, ModelSetting
 
@@ -71,7 +71,9 @@ class LogicUser(LogicModuleBase):
                 title = req.form['board_title']
                 board_type = req.form['board_type']
                 ret = self.daum_info(title, board_type)
-                ret['upload_title'] = f"{ToolBaseFile.text_for_filename(ret['title'])} ({ret['year']})"
+                ret['upload_title'] = ''
+                if board_type == 'share_movie':
+                    ret['upload_title'] = f"{ToolBaseFile.text_for_filename(ret['title'])} ({ret['year']})"
                 return jsonify(ret)
             elif sub == 'search_plex':
                 keyword = req.form['keyword']
