@@ -400,19 +400,19 @@ class LogicUser(LogicModuleBase):
     def do_action(self, req):
         try:
             upload_folderid = '1zO0FIExK4izwV93R0cYSZ13KW-TUVntC'
-            my_remote_path = req.form['my_remote_path']
+            my_remote_path = req.form['my_remote_path'].strip()
             
             # 게시판
-            board_type = req.form['board_type']
-            category_type = req.form['category_type']
-            board_title = req.form['board_title']
-            board_content = req.form['board_content']
-            board_daum_url = req.form['board_daum_url']
-            folder_name = req.form['folder_name'] 
+            board_type = req.form['board_type'].strip()
+            category_type = req.form['category_type'].strip()
+            board_title = req.form['board_title'].strip()
+            board_content = req.form['board_content'].strip()
+            board_daum_url = req.form['board_daum_url'].strip()
+            folder_name = req.form['folder_name'].strip()
 
-            size = int(req.form['size'])
-            daum_info = req.form['daum_info']
-            action = req.form['action']
+            size = int(req.form['size'].strip())
+            daum_info = req.form['daum_info'].strip()
+            action = req.form['action'].strip()
             user_id = SystemModelSetting.get('sjva_me_user_id')
             if board_content.startswith('ID:'):
                 user_id = board_content.split('\n')[0].split(':')[1].strip()
