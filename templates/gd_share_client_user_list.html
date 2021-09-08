@@ -43,6 +43,13 @@
     </div>
   </form>
   <div id='page1'></div>
+  <!--2021.09.07 기다림 선택항목 버튼 선언-->
+  <div id='check_btn' class="row show-grid" style="display:none">
+    <span class="col-md-6">
+      <button id="check_all_btn" class="btn btn-sm btn-outline-success">전체선택</button>
+      <button id="check_recopy_btn" class="btn btn-sm btn-outline-info">선택항목 재요청</button>
+    </span>
+  </div>
   {{ macros.m_hr_head_top() }}
   {{ macros.m_row_start('0') }}
   {{ macros.m_col(2,  macros.m_strong('Poster')) }}
@@ -71,6 +78,13 @@ $(document).ready(function(){
   } else {
     global_sub_request_search('1');
   }
+  //2021.09.07 기다림 상태값에 따라서 선택항목 재요청 버튼 관련 활성화 비활성화 추가
+  if(document.getElementById("option2").value=="request"  || document.getElementById("option2").value=="fail" || document.getElementById("option2").value=="ready"){
+    $('#check_btn').show();
+  }
+  else{
+    $('#check_btn').hide();  
+  }
 });
 
 $("#search").click(function(e) {
@@ -89,7 +103,8 @@ function make_list(data) {
   var now = Date.now();
   for (i in data) {
     str += m_row_start();
-    str += m_col(1, data[i].id);
+    // 2021.09.07 기다림 체크박스를 만들기 위해서 check_번호_를 추가
+    str += m_col(1, 'check_'+data[i].id +'_'+ data[i].id);
     //tmp = (data[i].status == 'completed') ? '완료' : '미완료';
     tmp = '상태 : ' + data[i].status;
     tmp += '<br>크기 : ' + humanFileSize(data[i].size);
@@ -113,6 +128,8 @@ function make_list(data) {
       var min_diff = (now - crtime)/60000;
       if (min_diff > 10) {
         tmp2 += m_button2('force_recopy_btn', '재요청', [{'key':'id', 'value':data[i].id}], 'info');
+        // 2021.09.07 기다림 재요청 대상일 경우 체크박스를 생성
+        str=str.replace('check_'+data[i].id +'_','<input type="checkbox" name="check" value="'+data[i].id+'"> ');
       }
     } else if (data[i].status == 'request') {
       var reqtime = Date.parse(data[i].request_time);
@@ -120,13 +137,19 @@ function make_list(data) {
       if (data[i].board_type == 'manual') {
         if (min_diff > 30) {
           tmp2 += m_button2('force_recopy_btn', '재요청', [{'key':'id', 'value':data[i].id}], 'info');
+          // 2021.09.07 기다림 재요청 대상일 경우 체크박스를 생성
+          str=str.replace('check_'+data[i].id +'_','<input type="checkbox" name="check" value="'+data[i].id+'"> ');
         }
       } else {
         if (min_diff > 10) {
           tmp2 += m_button2('force_recopy_btn', '재요청', [{'key':'id', 'value':data[i].id}], 'info');
+          // 2021.09.07 기다림 재요청 대상일 경우 체크박스를 생성
+          str=str.replace('check_'+data[i].id +'_','<input type="checkbox" name="check" value="'+data[i].id+'"> ');
         }
       }
     }
+    // 2021.09.07 기다림 체크박스를 생성이 다 완료 되었으면 체크박스 대상이 것은 공백처리
+    str=str.replace('check_'+data[i].id +'_','');
     tmp2 += m_button2('global_remove_btn', '삭제', [{'key':'id', 'value':data[i].id}], 'danger');
     tmp += '<br>' + m_button_group(tmp2)
     str += m_col(4, tmp)
@@ -166,11 +189,54 @@ $("body").on('click', '#force_recopy_btn', function(e){
   });
 });
 
+//2021.09.07 기다림 전체선택 로직 추가
+$("body").on('click', '#check_all_btn', function(e){
+  e.preventDefault();
+  $("input[name='check']").each(function(e){
+    $(this).prop("checked", true);
+  });
+});
+
+//2021.09.07 기다림 선택항목 재요청 로직 추가
+$("body").on('click', '#check_recopy_btn', function(e){
+  e.preventDefault();
+  var len = $("input[name='check']:checked").length;
+  console.log(len);
+  if(len => 1){
+    $("input[name='check']:checked").each(function(e){
+      item_id = $(this).val();
+      console.log(item_id);
+      $.ajax({
+        url: '/' + package_name + '/ajax/' + sub + '/add_copy_force',
+        type: "POST",
+        cache: false,
+        data: {item_id:item_id},
+        dataType: "json",
+        success: function (data) {
+          if (data.ret == 'success' && data.server_response.ret == 'enqueue') {
+            $.notify('<strong>재요청을 완료하였습니다.</strong>', {type: 'success'});
+          } else {
+            $.notify('<strong>재요청이 실패하였습니다.</strong>', {type: 'warning'});
+          }
+        }
+      });
+    })
+  }
+  global_sub_request_search(current_page);
+});
+
 
 $("body").on('change', '#option1', function(e){
   global_sub_request_search('1');
 });
 $("body").on('change', '#option2', function(e){
+  //2021.09.07 기다림 상태값에 따라서 선택항목 재요청 버튼 관련 활성화 비활성화 추가
+  if($(this).val()=="request"  || $(this).val()=="fail" || $(this).val()=="ready"){
+    $('#check_btn').show();
+  }
+  else{
+    jQuery('#check_btn').hide();  
+  }
   global_sub_request_search('1');
 });
 $("body").on('change', '#order', function(e){
